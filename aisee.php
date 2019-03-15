@@ -37,6 +37,34 @@ class AISee {
     }
 
     function hooks(){
+        add_action( 'admin_menu', array( $this, 'settings_menu' ) );
+        add_action( 'admin_head', array( $this, 'admin_style' ) );
+    }
+
+    function settings_menu(){
+        $hook_suffix = add_menu_page(
+			'AISee SEO', 
+			'AISee SEO', 
+			'manage_options', 
+			'aisee', 
+            array( $this, 'settings_page' ),
+            $this->uri . 'assets/brand-icon.svg'
+        );
+        add_submenu_page( 'wpmr', 'Run Scan', 'Run Scan', 'manage_options' , 'wpmr', array($this, 'settings_page'));
+        //add_submenu_page( 'wpmr', 'Tools', 'Tools', 'manage_options' , 'wpmr-tools', array($this, 'wpmrtools'));
+    }
+
+    function settings_page(){
+        ?>
+        <div class="wrap">
+        dhinchak!
+        </div>
+        <?php
+    }
+
+    function admin_style(){ ?>
+        <style type="text/css">#toplevel_page_aisee .wp-menu-image img { width: 20px;height: auto;opacity: 1;padding: 9px 0 0 0;}</style>
+        <?php
     }
 
 }
