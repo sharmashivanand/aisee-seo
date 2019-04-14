@@ -4,7 +4,7 @@ Tags: GSC Insights for content optimizers. Fetch SEO clicks, impressions, CTR an
 Requires at least: 3.7.4
 Tested up to: 5.1
 Requires PHP: 7.0
-Stable tag: 1.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -30,5 +30,5 @@ Ask away.
 
 == Changelog ==
 
-= 1.0 =
+= 1.0.1 =
 Initial release

@@ -1,19 +1,32 @@
 #aisee-tag.postbox p.submit {
-  float: none;
+    float: none;
 }
 
 #aisee-tag-cloud {
-  text-align: center;
-  text-transform: uppercase;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 .aitag {
-  text-transform: uppercase;
-  margin: 0.05em 0;
-  display: inline-flex;
-  background: hsl(0, 0%, 0%);
-  color: hsl(0, 0%, 100%);
-  padding: 10px;
-  border-radius: 1.618em;
-  line-height: 1em;
+    text-transform: uppercase;
+    margin: 0.05em 0;
+    display: inline-flex;
+    background: hsl(0, 0%, 0%);
+    color: hsl(0, 0%, 100%);
+    padding: 10px;
+    border-radius: 1.618em;
+    line-height: 1em;
+}
+
+#aisee_reg_form input {
+    display: block;
+    width: 250px;
+    padding: .618em 1em;
+    margin-bottom: .618em;
+}
+
+#aisee-register {
+    padding: .618em 1em;
+    margin-bottom: .618em;
+    box-sizing: content-box;
 }
