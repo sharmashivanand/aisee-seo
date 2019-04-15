@@ -12,7 +12,7 @@
  */
 
 define( 'AISEEFILE', __FILE__ );
-define( 'AISEEAPIEP', 'https://aiseeseo.com/?p=9' );
+define( 'AISEEAPIEPSL', 'https://aiseeseo.com/?p=9' );
 
 
 
@@ -45,9 +45,49 @@ class AISee {
         
         add_action( 'wp_ajax_aisee_tag_cloud', array( $this, 'aisee_tag_cloud' )); // respond to ajax
         add_action( 'wp_ajax_nopriv_aisee_tag_cloud', '__return_false' ); // do not respont to ajax
+
+        add_action( 'admin_init', array($this, 'save_gsc_profile' ));
+
         
         add_action( 'wp_ajax_aisee_register', array( $this, 'aisee_register' )); // respond to ajax
         add_action( 'wp_ajax_nopriv_aisee_register', '__return_false' ); // do not respont to ajax
+        
+        add_action( 'wp_ajax_aisee_get_connect_link', array( $this, 'get_connect_link' )); // respond to ajax
+        add_action( 'wp_ajax_nopriv_get_connect_link', '__return_false' ); // do not respont to ajax
+    }
+
+    function save_gsc_profile(){
+        if ( isset( $_REQUEST['aisee-action'] ) && $_REQUEST['aisee-action'] == 'oauth' ) {
+            wp_verify_nonce( $_REQUEST['origin_nonce'], 'aisee_gscapi' );
+            if( current_user_can('activate_plugins') &&
+                !empty($_REQUEST['success']) &&
+                $_REQUEST['success'] == 1
+            ){
+                //$this->llog($_REQUEST);
+                $aisee_reg = get_option('aiseeseo');
+                if( $aisee_reg ) {
+                    $aisee_reg['gsc'] = true;
+                    update_option( 'aiseeseo', $aisee_reg );
+                    //$this->llog(get_option('aiseeseo'));
+                }
+            }
+            else {  
+            }
+            //$this->llog($_REQUEST);
+            //$this->llog(html_entity_decode( get_edit_post_link( sanitize_text_field( $_REQUEST['post'] ) ) ));
+            //die();
+            wp_redirect( html_entity_decode( get_edit_post_link( sanitize_text_field( $_REQUEST['post'] ) ) ), 302 );
+            exit;
+            //wp_redirect(  get_edit_post_link( sanitize_text_field( $_REQUEST['post'] ) ), 302 );
+        }
+        
+        if ( isset( $_REQUEST['aisee-action'] ) && $_REQUEST['aisee-action'] == 'revoke' && isset( $_REQUEST['success'] ) && $_REQUEST['success'] == '1' ) {
+            $aisee_reg = get_option('aiseeseo');
+            if($aisee_reg && !empty($aisee_reg['gsc'])) {
+                unset($aisee_reg['gsc']);
+                update_option('aiseeseo', $aisee_reg);
+            }
+        }
     }
 
     function plugin_styles(){
@@ -69,49 +109,27 @@ class AISee {
     }
 
     function aisee_gsc_mb(){
+        global $post;
+        //delete_option( 'aiseeseo' );
         ?>
         <div class="aisee-updates">
             <?php
-            if( $this->has_connectable_account() ) {
-                global $post;
-                $statevars = array(
-                    'origin_site_url' => get_site_url(),
-                    'return_url' => get_edit_post_link($post->ID),
-                    'origin_nonce' => wp_create_nonce( 'wprtsp_gaapi' ),
-                    'origin_ajaxurl' => admin_url( 'admin-ajax.php' ),
-                );
-                $statevars = $this->encode($statevars);
-                $auth = esc_url( add_query_arg( 'g_authenticate', $statevars, AISEEAPIEP ) );
-                $revoke = esc_url( add_query_arg( 'g_revoke', $statevars, AISEEAPIEP ) );
-                ?>
-                <input type="hidden" <?php echo $readonly ?> id="connect" name="aiseeseo['aiseeseo_connection']" value="<?php echo esc_attr( $this->get_setting('aiseeseo_connection')); ?>" />
-                <?php
-                if( ! $ga_profile) { 
-                    ?>
-                    <a class="button-primary" href="<?php echo $auth ?>">Connect with Google&trade; Search Console</a>
-                    <?php
-                }
-                else {
-                    ?>
-                    Profile Active: <?php echo $ga_profile; ?><br /><a href="<?php echo $revoke ?>" class="button-primary">Disconnect from Google&trade; Search Console</a>
-                    <?php
-                }
-            }
-            else {
+            if( ! $this->get_connectable_account()) {
                 ?>
                 <div id="is_unregistered">
-                <p><strong>Let's start setting up your AISee account to get search insights from Google&trade; Search Console.</p><p>Worry not, it's free and just takes a click!</strong></p>
-                <?php
-                $current_user = wp_get_current_user();
-                ?>
-                <div id="aisee_reg_form">
-                    <label><strong>First name</strong> <input type="text" name="aisee_fn" id="aisee_fn" required value="<?php echo $current_user->user_firstname ?>" /></label>
-                    <label><strong>Last name</strong> <input type="text" name="aisee_ln" id="aisee_ln" required value="<?php echo $current_user->user_lastname ?>" /></label>
-                    <label><strong>Email</strong> <input type="email" name="aisee_eml" id="aisee_eml" required value="<?php echo $current_user->user_email ?>" /></label>
-                    <label><strong>Site</strong> <input type="URL" readonly name="aisee_url" id="aisee_url" required value="<?php echo site_url(); ?>" /></label>
+                    <p><strong>Let's start setting up your AISee account to get search insights from Google&trade; Search Console.</strong></p><p><strong>Worry not, it's free and just takes a click!</strong></p>
+                    <?php
+                    $current_user = wp_get_current_user();
+                    ?>
+                    <div id="aisee_reg_form">
+                        <label><strong>First name</strong> <input type="text" name="aisee_fn" id="aisee_fn" required value="<?php echo $current_user->user_firstname ?>" /></label>
+                        <label><strong>Last name</strong> <input type="text" name="aisee_ln" id="aisee_ln" required value="<?php echo $current_user->user_lastname ?>" /></label>
+                        <label><strong>Email</strong> <input type="email" name="aisee_eml" id="aisee_eml" required value="<?php echo $current_user->user_email ?>" /></label>
+                        <label><strong>Site</strong> <input type="URL" readonly name="aisee_url" id="aisee_url" required value="<?php echo trailingslashit(site_url()); ?>" /></label>
+                    </div>
+                    <div id="reg_status"></div>
+                    <p><?php submit_button( 'Setup Account', 'primary large', 'aisee-register', false ); ?></p>
                 </div>
-                <div id="reg_status"></div>
-                <p><?php submit_button( 'Setup Account', 'primary', 'aisee-register', false ); ?></p>
             <script type="text/javascript">
             jQuery(document).ready(function ($) { //wrapper
                 $("#aisee-register").click(function (e) {
@@ -143,7 +161,31 @@ class AISee {
                             console.dir( jqXHR );
                             if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('success') && jqXHR.responseJSON.success == true){
                                 response = jqXHR.responseJSON.data;
-                                $('#reg_status').html('<p><strong>Your account is ready! Let\'s connect to Google&trade; Search Console.</strong></p>');
+                                //$('#is_unregistered').html('<p><strong>Your account is ready! Let\'s connect to Google&trade; Search Console.</strong></p>' + '<?php echo $button ?>');
+                                get_connect_link = {
+                                    get_connect_link_nonce: '<?php echo wp_create_nonce( 'get_connect_link' ); ?>',
+                                    action: "aisee_get_connect_link",
+                                    cachebust: Date.now(),
+                                    post_id: <?php global $post; echo $post->ID ; ?>,
+                                };
+                                //console.log(get_connect_link);
+                                
+                                $.ajax({
+                                    url: ajaxurl,
+                                    method: 'POST',
+                                    data: get_connect_link,
+                                    
+                                    complete: function(jqXHR, textStatus) {
+                                        console.dir( jqXHR );
+                                        if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('success') && jqXHR.responseJSON.success == true){
+                                            response = jqXHR.responseJSON.data;
+                                            $('#is_unregistered').html('<p><strong>Your account is ready! Let\'s connect to Google&trade; Search Console.</strong></p>' + response);
+                                        }
+                                        else{
+                                            $('#reg_status').html('<p><strong>Error:</strong> ' + response + '</p>');
+                                        }
+                                    },
+                                });
                                 //location.reload(true);
                             }
                             else {
@@ -156,7 +198,6 @@ class AISee {
                             }
                         },
                         success: function (response) {
-                            
                         } // initialize
                     }); // ajax post
                     return false;
@@ -166,18 +207,75 @@ class AISee {
         </div>
         <?php
         }
+        else{
+            if( ! $this->is_connected() ){
+                echo '<p>';
+                echo $this->connection_button();
+                echo '</p>';
+            }
+            else { // we are set
+                ?>
+                <a href="" class="button primary button-primary">Fetch Data from Google&trade; Search Console</a>
+                <?php
+            }
+        }
+        $this->llog(get_option('aiseeseo'));
+    }
+
+    function is_connected(){
+        return $this->get_setting('gsc');
+    }
+
+    function connection_button(){
+        global $post;
+        $id = get_edit_post_link($post->ID);
+        $statevars = array(
+            'site_url' => trailingslashit(get_site_url()),
+            'return_url' => $id,
+            'origin_nonce' => wp_create_nonce( 'aisee_gscapi' ),
+            'origin_ajaxurl' => admin_url( 'admin-ajax.php' ),
+        );
+        $account = $this->get_connectable_account();
+        if(!$account) {
+           return;
+        }
+
+        $statevars = $this->encode(array_merge($account, $statevars));
+        $auth = esc_url( add_query_arg( 'aisee_gsc_authenticate', $statevars, AISEEAPIEPSL ) );
+
+        return '<a class="button-primary large" href="'.$auth.'">Connect with Google&trade; Search Console</a>';
+    }
+
+    function get_connect_link(){
+        check_ajax_referer( 'get_connect_link', 'get_connect_link_nonce' );
+        $id = !empty($_REQUEST['post_id']) ? get_edit_post_link( sanitize_text_field( $_REQUEST['post_id'] ) ) : false;
+        if(!$id) {
+            wp_send_json_error('Invalid post ID');
+        }
+        $statevars = array(
+            'site_url' => trailingslashit(get_site_url()),
+            'return_url' => $id,
+            'origin_nonce' => wp_create_nonce( 'aisee_gscapi' ),
+            'origin_ajaxurl' => admin_url( 'admin-ajax.php' ),
+        );
+        $account = $this->get_connectable_account();
+        if(!$account) {
+            wp_send_json_error('Account not setup');
+        }
+
+        $statevars = $this->encode(array_merge($account, $statevars));
+        $auth = esc_url( add_query_arg( 'aisee_gsc_authenticate', $statevars, AISEEAPIEPSL ) );
+        wp_send_json_success('<a class="button-primary large" href="'.$auth.'">Connect with Google&trade; Search Console</a>');
+        //return $auth;
+        //$revoke = esc_url( add_query_arg( 'aisee_gsc_revoke', $statevars, AISEEAPIEPSL ) );
     }
 
     function aisee_register(){
-        //wp_send_json_success( 'Invalid details' );
-        //wp_send_json_error( 'Invalid details' );
-
+        //delete_option( 'aiseeseo' );
         check_ajax_referer( 'aisee_register', 'aisee_register_nonce' );
-
         if(empty($_REQUEST['user'])) {
             wp_send_json_error( 'Invalid details' );
         }
-
         $firstname = !empty($_REQUEST['user']['fn']) ? sanitize_text_field($_REQUEST['user']['fn']) : '' ;
         $lastname  = !empty($_REQUEST['user']['ln']) ? sanitize_text_field($_REQUEST['user']['ln']) : '' ;
         $useremail = !empty($_REQUEST['user']['email']) ? sanitize_text_field($_REQUEST['user']['email']) : '' ;
@@ -208,10 +306,9 @@ class AISee {
             add_query_arg(
                 'p',
                 '9',
-                add_query_arg('reg_details',$args, AISEEAPIEP)
+                add_query_arg('reg_details',$args, AISEEAPIEPSL)
                 )
             );
-        //wp_send_json_success($url);
         $response = wp_safe_remote_request(
             $url,
             array(
@@ -221,25 +318,26 @@ class AISee {
         if( is_wp_error($response) ) {
             wp_send_json_error( $response->get_error_message() );
         }
-        
         $response = wp_remote_retrieve_body($response);
-        wp_send_json_success($response);
         if(empty($response) || is_null($response)){
             wp_send_json_error( 'No response from AISee Server. Registration Failed.' );
         }
-
-        $data = json_decode( $response, true );
-        if(is_null($data)) {
+        $response = json_decode( $response, true );
+        if(is_null($response)) {
             wp_send_json_error( 'Invalid server response.' );
         }
-        if( isset( $data['success'] ) && $data['success'] == true) {
-            update_option( 'aisee_reg', $data );
-            //wp_send_json_success( $data );
-            wp_send_json_success( 'Registration Succeeded.' );
+        if( isset( $response['success'] ) && $response['success'] == true) {
+            if( !empty($response['data']['ID']) && !empty($response['data']['user_email']) ) {
+                update_option( 'aiseeseo', $response['data'] ); // response['data] needs validation
+                wp_send_json_success( 'Registration Succeeded.' );
+            }
+            else {
+                wp_send_json_error( 'Invalid server response.' );
+            }
         }
         if( isset( $data['success'] ) && $data['success'] != true) {
             if( isset($data['data']) ){
-                wp_send_json_error( sanitize_text_field( $data['data'] ) );
+                wp_send_json_error( sanitize_text_field( $response['data'] ) );
             }
             else {
                 wp_send_json_error( 'Unknown error occurred on the server.' );
@@ -285,8 +383,8 @@ class AISee {
                 });
             });
         });
-    </script>
-    <?php
+        </script>
+        <?php
     }
     
     function aisee_tag_cloud(){
@@ -408,9 +506,10 @@ class AISee {
     }
 
     function defaults() {
-        $defaults = array(
-            'connection' => '',
-        );
+        //$defaults = array(
+        //    'connection' => '',
+        //);
+        $defaults = array();
         return $defaults;
     }
 
@@ -418,8 +517,8 @@ class AISee {
         return $settings;
     }
 
-    function has_connectable_account(){
-        return get_option('aisee_account');
+    function get_connectable_account(){
+        return get_option('aiseeseo');
     }
     
     function encode($data){
