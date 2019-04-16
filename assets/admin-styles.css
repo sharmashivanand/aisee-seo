@@ -25,6 +25,45 @@
     margin-bottom: .618em;
 }
 
+#aisee_gsc_keywords {
+    border-collapse: collapse;
+}
+
+#aisee_gsc_keywords th {
+    background: #eee;
+    padding: .618em 1em;
+}
+
+#aisee_gsc_keywords tr:nth-child(even) {
+    background: #f7f7f7;
+}
+
+#aisee_gsc_keywords tr:nth-child(odd) {
+    background: #fff;
+}
+
+#aisee_gsc_keywords td {
+    padding: .618em 1em;
+}
+
+.aisee-btn {
+    transition: all .2s linear !important;
+}
+
+.aisee-btn-loading {
+    background-image: url(brand-icon-anim.svg) !important;
+    background-repeat: no-repeat !important;
+    background-size: 18px !important;
+    background-position: 10px center !important;
+    padding-left: 40px !important;
+    text-shadow: 0 -1px 1px #eee, 1px 0 1px #eee, 0 1px 1px #eee, -1px 0 1px #eee !important;
+    box-shadow: 0 1px 0 #ccc !important;
+    background-color: white !important;
+    border-color: #ccc !important;
+    color: #000 !important;
+}
+
+
 /* #aisee-register {
     padding: .618em 1em;
     margin-bottom: .618em;
