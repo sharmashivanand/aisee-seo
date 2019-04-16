@@ -1,6 +1,6 @@
 === AISee SEO ===
 Contributors: varun21, ruchikawp
-Tags: GSC Insights for content optimizers. Fetch SEO clicks, impressions, CTR and SERPS position of posts and pages from Google Search Console (Google Webmaster Tools)
+Tags: seo, google search console, content analysis, keyword research, search optimization
 Requires at least: 3.7.4
 Tested up to: 5.1
 Requires PHP: 7.0
