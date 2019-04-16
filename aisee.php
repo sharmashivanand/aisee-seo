@@ -3,7 +3,7 @@
  * Plugin Name: AISee SEO
  * Plugin URI:  https://converticacommerce.com
  * Description: Keyword visualization, tag cloud generator and LSI keyword helper.
- * Version:     1.0.2
+ * Version:     2.0
  * Author:      Shivanand Sharma
  * Author URI:  https://www.converticacommerce.com
  * Text Domain: aisee
@@ -65,22 +65,16 @@ class AISee {
                 !empty($_REQUEST['success']) &&
                 $_REQUEST['success'] == 1
             ){
-                //$this->llog($_REQUEST);
                 $aisee_reg = get_option('aiseeseo');
                 if( $aisee_reg ) {
                     $aisee_reg['gsc'] = true;
                     update_option( 'aiseeseo', $aisee_reg );
-                    //$this->llog(get_option('aiseeseo'));
                 }
             }
             else {  
             }
-            
-            //$this->llog(html_entity_decode( get_edit_post_link( sanitize_text_field( $_REQUEST['post'] ) ) ));
-            //die();
             wp_redirect( html_entity_decode( get_edit_post_link( sanitize_text_field( $_REQUEST['post'] ) ) ), 302 );
             exit;
-            //wp_redirect(  get_edit_post_link( sanitize_text_field( $_REQUEST['post'] ) ), 302 );
         }
         
         if ( isset( $_REQUEST['aisee-action'] ) && $_REQUEST['aisee-action'] == 'revoke' && isset( $_REQUEST['success'] ) && $_REQUEST['success'] == '1' ) {
@@ -168,32 +162,6 @@ class AISee {
                             if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('success') && jqXHR.responseJSON.success == true){
                                 response = jqXHR.responseJSON.data;
                                 $('#is_unregistered').html('<p><strong>Your account is ready! Let\'s connect to Google&trade; Search Console.</strong></p>' + '<a class="button-primary large" data-href="' + response + '" onclick="window.top.location.href = this.getAttribute(\'data-href\')" >Connect with Google&trade; Search Console</a>');
-                                /* */
-                                //get_connect_link = {
-                                //    get_connect_link_nonce: '<?php echo wp_create_nonce( 'get_connect_link' ); ?>',
-                                //    action: "aisee_get_connect_link",
-                                //    cachebust: Date.now(),
-                                //    post_id: <?php global $post; echo $post->ID ; ?>,
-                                //};
-                                ////console.log(get_connect_link);
-                                //
-                                //$.ajax({
-                                //    url: ajaxurl,
-                                //    method: 'POST',
-                                //    data: get_connect_link,
-                                //    
-                                //    complete: function(jqXHR, textStatus) {
-                                //        console.dir( jqXHR );
-                                //        if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('success') && jqXHR.responseJSON.success == true){
-                                //            response = jqXHR.responseJSON.data;
-                                //            $('#is_unregistered').html('<p><strong>Your account is ready! Let\'s connect to Google&trade; Search Console.</strong></p>' + response);
-                                //        }
-                                //        else{
-                                //            $('#reg_status').html('<p><strong>Error:</strong> ' + response + '</p>');
-                                //        }
-                                //    },
-                                //});
-                                ////location.reload(true);
                             }
                             else {
                                 if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('data')) {
@@ -235,15 +203,12 @@ class AISee {
                 jQuery(document).ready(function ($) { //wrapper
                     $("#aisee_gsc_fetch").click(function (e) {
                         e.preventDefault();
-                        //console.log($(this).attr('data-href'));
                         $(this).addClass('aisee-btn-loading');
                         aisee_gsc_fetch = {
                             aisee_gsc_fetch_nonce: '<?php echo wp_create_nonce( 'aisee_gsc_fetch' ); ?>',
                             action: "aisee_gsc_fetch",
-                            //datasrc: $(this).attr('data-href'),
                             postid: '<?php echo $post->ID; ?>',
                         };
-
                         $.ajax({
                             url: ajaxurl,
                             method: 'POST',
@@ -254,25 +219,13 @@ class AISee {
                                 if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('success') && jqXHR.responseJSON.success == true){
                                     response = jqXHR.responseJSON.data;
                                     $('#aisee_gsc_keywords').html(response);
-                                    //console.dir( response );
-                                    //return;
-                                    //console.log(response.length)
-                                    //if(response.length){
-                                    //    html = '';
-                                    //    response.forEach((item) => {
-                                    //        //console.dir(item);
-                                    //        html += '<tr><td>'+item.keys+'</td><td>'+item.clicks+'</td><td>'+ ( 100 * item.ctr ).toFixed(1) +'</td><td>'+item.impressions+'</td></tr>';
-                                    //    });
-                                    //    html = '<table><thead><tr><th>Keyword Phrase</th><th>Clicks</th><th>CTR</th><th>Impressions</th></tr></thead>' + html + '</table>';
-                                    //    $('#aisee_gsc_keywords').html(html);
-                                    //}
                                 }
                                 else {
                                     if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('data')) {
-                                        $('#reg_status').html('<p><strong>' + jqXHR.responseJSON.data + '. Please email support@aiseeseo.com with this exact error.</strong></p>');
+                                        $('#aisee_gsc_keywords').html('<p><strong>' + jqXHR.responseJSON.data + ' Please email <a href="mailto:support@aiseeseo.com">support@aiseeseo.com</a> with this exact error.</strong></p>');
                                     }
-                                    else {
-                                        $('#reg_status').html('<p><strong>' + jqXHR.responseJSON.data + '. Please email support@aiseeseo.com.</strong></p>');
+                                    else { // not json or no data
+                                        $('#reg_status').html('<p><strong>Plugin failed to parse data. Please email <a href="mailto:support@aiseeseo.com">support@aiseeseo.com</a>.</strong></p>');
                                     }
                                 }
                             },
@@ -285,33 +238,28 @@ class AISee {
                 <?php
             }
         }
-        //$this->llog(get_option('aiseeseo'));
     }
 
     function aisee_gsc_fetch(){
         check_ajax_referer( 'aisee_gsc_fetch', 'aisee_gsc_fetch_nonce' );
-        //wp_send_json(delete_post_meta($_REQUEST['postid'], '_aisee_keywords'));
-        //$url = sanitize_text_field($_REQUEST['datasrc']);
         $id = sanitize_text_field($_REQUEST['postid']);
         $url = $this->get_oauth_link($id, 'aisee_gsc_fetch');
-        $url = add_query_arg( 'cb', microtime(TRUE) , $url );
+        $url = add_query_arg( 'cb', time() , $url );
         $url = add_query_arg( 'status', $this->get_status(), $url );
-        
         $meta = get_post_meta($id, '_aisee_keywords', true);
         if($meta) {
             if( (time() - strtotime($meta['time'])) >= (86400 * 15) ) {
                 $meta = false;
             }
         }
-        if(! $meta){
+        if( ! $meta ){
             $args = array(
                 'httpversion' => '1.1',
                 'compress' => true,
                 'headers' => array(
-                    'aisee_gsc_fetch' => true
+                    'aisee-gsc-fetch' => true
                 ),
             );
-
             $response = wp_safe_remote_request(
                 $url,
                 $args
@@ -319,18 +267,18 @@ class AISee {
             if( is_wp_error($response) ) {
                 wp_send_json_error( $response->get_error_message() );
             }
+            $status_code = wp_remote_retrieve_response_code( $response );
+            if( 200 != $status_code ) {
+                wp_send_json_error( 'Failed to fetch response from AISee service. Error Code: ' . $status_code );
+            }
             $response = wp_remote_retrieve_body($response);
             if(empty($response) || is_null($response)){
-                wp_send_json_error( 'No response from AISee Server. Registration Failed.' );
+                wp_send_json_error( 'Empty server respose.' );
             }
-            //print_r( $response  );
-            //die();
             $response = json_decode( $response, true );
-            
-            if(is_null($response)) { // NULL is returned if the json cannot be decoded or if the encoded data is deeper than the recursion limit.
+            if(is_null($response)) { // NULL if the json cannot be decoded / data is deeper than recursion limit. OR no data exists
                 wp_send_json_error( 'Invalid server response.' );
             }
-            
             if( isset( $response['success'] ) && $response['success'] == true) {
                 if( ! empty( $response['data'] ) ) {
                     $meta = array('time' => time(), 'keywords' => $response['data']);
@@ -339,7 +287,7 @@ class AISee {
                     wp_send_json_success( $html );
                 }
                 else {
-                    wp_send_json_error( 'Invalid server response.' );
+                    wp_send_json_success( 'No keywords yet.' );
                 }
             }
             if( isset( $data['success'] ) && $data['success'] != true) {
@@ -363,7 +311,6 @@ class AISee {
         if(!$keywords) {
             return;
         }
-        //$this->llog($meta);
         if(count($keywords)) {
             foreach($keywords as $key => $value) {
                 $html .= '<tr><td>'.$value['keys'].'</td><td>'.$value['clicks'].'</td><td>'.round( (100 * $value['ctr']), 2 ).'%</td><td>'.$value['impressions'].'</td><td>'.round($value['position'], 2).'</td></tr>';
@@ -458,7 +405,6 @@ class AISee {
             wp_send_json_error('Account not setup');
         }
         $auth = $this->get_oauth_link($id, 'aisee_gsc_authenticate');
-        
         wp_send_json_success('<a class="button-primary large" data-href="'.$auth.'" onclick="window.top.location.href = this.getAttribute(\'data-href\')" >Connect with Google&trade; Search Console</a>');
     }
 
@@ -489,7 +435,6 @@ class AISee {
                 'cachebust' => microtime()
             )
         );
-
         $args = $this->encode($args);
         $url = add_query_arg(
             'aisee_action',
@@ -505,6 +450,10 @@ class AISee {
         );
         if( is_wp_error($response) ) {
             wp_send_json_error( $response->get_error_message() );
+        }
+        $status_code = wp_remote_retrieve_response_code( $response );
+        if( 200 != $status_code ) {
+            wp_send_json_error( 'Failed to fetch response from AISee service. Error Code: ' . $status_code );
         }
         $response = wp_remote_retrieve_body($response);
         if(empty($response) || is_null($response)){
@@ -541,7 +490,6 @@ class AISee {
         <?php
         echo '<p>';
         echo '<a href="#" class="button-primary aisee-btn large" id="aisee-generate-tag-cloud">Generate Tag Cloud</a>';
-        //submit_button( 'Generate Tag Cloud', 'primary aisee-btn', 'aisee-generate-tag-cloud', false);
         echo '</p>';
         ?>
         <script type="text/javascript">
@@ -581,20 +529,14 @@ class AISee {
     }
     
     function aisee_tag_cloud(){
-
         check_ajax_referer( 'aisee_tag_cloud', 'aisee_tag_cloud_nonce' );
-        
-        // Don't get caught pants down... again
         $post_id         = !empty($_REQUEST['post_id']) ? sanitize_text_field( $_REQUEST['post_id'] ) : 0 ;
         $trimlen         = !empty($_REQUEST['trim']) ?  (int) sanitize_text_field( $_REQUEST['trim'] ) : 0;
         $drop_percentage = !empty($_REQUEST['drop_percentage'])? sanitize_text_field( $_REQUEST['drop_percentage'] ) : 0;
-                    
         $status = get_post_status($post_id);
-        
         if(! $status ) {
             wp_send_json_error( 'Post does not exist.' );
         }
-
         $url = false;
         if( $status == 'publish' ) {
             $url = get_permalink($post_id);
@@ -606,26 +548,19 @@ class AISee {
         $response = wp_safe_remote_request(
             $url
         );
-
-        if(is_wp_error($response)) {
+        if( is_wp_error($response) ) {
             wp_send_json_error( $response->get_error_message() );
         }
-        
         $status_code = wp_remote_retrieve_response_code( $response );
-
         if( 200 != $status_code ) {
             wp_send_json_error( 'Failed to fetch post content: ' . $status_code );
         }
-        
         $keywords = wp_remote_retrieve_body( $response );
-        
         if(!$keywords) {
             wp_send_json_error('Encountered empty content.' );
         }
-        
         $keywords = sanitize_text_field($keywords);
         $stop     = $this->stop_words();
-
         $dom = new DOMDocument();
         $dom->loadHTML($keywords);
         $_scripts=$dom->getElementsByTagName("script");
@@ -636,7 +571,6 @@ class AISee {
         foreach ($scripts as $script) {
             $script->parentNode->removeChild($script);
         }
-
         $_styles=$dom->getElementsByTagName("style");
         $styles = array();
         foreach ($_styles as $style) {
@@ -645,7 +579,6 @@ class AISee {
         foreach ($styles as $style) {
             $style->parentNode->removeChild($style);
         }
-        
         $keywords = $dom->saveHTML();
         $pattern  = '/(&[a-zA-Z]+);/';
         $keywords = preg_replace($pattern,' ', $keywords);
@@ -656,39 +589,31 @@ class AISee {
         $keywords = explode(' ',$keywords);
         $keywords = array_diff($keywords, $stop);
         $tags     = array_count_values($keywords);
-
         $tags = array_filter($tags, function($v,$k) use($trimlen) {
             $k = preg_replace('/\b\d+\b/','',$k);
-            //if( $v == 1 ) { // remove words that occur only once; they have no weight
-            //    return false;
-            //}
+            if( $v == 1 ) { // remove words that occur only once; they have no weight
+                return false;
+            }
             if(strlen(trim($k)) && strlen(trim($k)) < $trimlen ) {
                 return false;
             }
             return ! empty( trim( $k ) );
         }, ARRAY_FILTER_USE_BOTH);
-        
         arsort( $tags );
-
         $newtags = array();
         $avg     = ( max( $tags ) + min( $tags ) ) / 2;
         $avg     = $avg / 1.618;                     // fine-tune the scaling here
-        
         foreach($tags as $key => $value) {
             if( ( $drop_percentage ) > ( ( $value * 100 ) / count( $tags ) )  ) {
                 continue;
             }
             $newtags[] = '<span class="aitag" style="font-size:'. ( 16.81 * ( ( $value + $avg ) / $avg ) ).'px">'.$key.'</span>';
         }
-
         for( $i=0; $i <= 49 ; $i++ ){
             shuffle( $newtags );
         }
-
         //arsort( $newtags );
-        
         $newtags = implode( ' ', $newtags ); // Turn the array into a plain string. Only contains aplha-numeric chars.
-        
         wp_send_json_success( wp_kses($newtags, array('span' => array('style'=>array(),'class'=>array()))) );
     }
 
