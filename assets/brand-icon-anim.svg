@@ -2,12 +2,10 @@
     <defs>
         <style>
         .cls-1{
-            
-            
         }
         .cls-2{
             fill:#00eaff;
-            animation: aiseeloading 10s linear infinite;
+            animation: aiseeloading .4s linear infinite;
         }
         @keyframes aiseeloading {
             0% { fill: hsl(0,100%,50%); }

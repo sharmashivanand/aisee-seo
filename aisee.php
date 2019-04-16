@@ -366,12 +366,12 @@ class AISee {
         //$this->llog($meta);
         if(count($keywords)) {
             foreach($keywords as $key => $value) {
-                $html .= '<tr><td>'.$value['keys'].'</td><td>'.$value['clicks'].'</td><td>'.round( (100 * $value['ctr']), 2 ).'%</td><td>'.$value['impressions'].'</td></tr>';
+                $html .= '<tr><td>'.$value['keys'].'</td><td>'.$value['clicks'].'</td><td>'.round( (100 * $value['ctr']), 2 ).'%</td><td>'.$value['impressions'].'</td><td>'.round($value['position'], 2).'</td></tr>';
             }
-            $html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th>Keyword Phrase</th><th>Clicks</th><th>CTR</th><th>Impressions</th></tr></thead>' . $html . '</table>';
+            $html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th>Keyword Phrase</th><th>Clicks</th><th>CTR</th><th>Impressions</th><th>Position</th></tr></thead>' . $html . '</table>';
         }
         else {
-            $html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th>Keyword Phrase</th><th>Clicks</th><th>CTR</th><th>Impressions</th></tr></thead><tr><td colspan="4">No keywords found</td></tr></table>';
+            $html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th>Keyword Phrase</th><th>Clicks</th><th>CTR</th><th>Impressions</th><th>Position</th></tr></thead><tr><td colspan="4">No keywords found</td></tr></table>';
         }
         if(!empty($meta['time'])) {
             $fetched = date( get_option('date_format') .' '. get_option('time_format') , $meta['time']) ;
