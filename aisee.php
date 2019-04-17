@@ -15,6 +15,7 @@ define( 'AISEEFILE', __FILE__ );
 define( 'AISEEAPIEPSL', 'https://aiseeseo.com/?p=9' );
 
 class AISee {
+    
     function __construct(){
     }
 
