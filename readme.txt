@@ -4,7 +4,7 @@ Tags: seo, google search console, content analysis, keyword research, search opt
 Requires at least: 3.7.4
 Tested up to: 5.1
 Requires PHP: 7.0
-Stable tag: 2.0
+Stable tag: 2.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
