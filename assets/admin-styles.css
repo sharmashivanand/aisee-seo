@@ -69,3 +69,11 @@
     margin-bottom: .618em;
     box-sizing: content-box;
 } */
+
+.aisee_suggestions{
+    box-sizing: border-box;
+}
+
+.aisee_suggestions li{
+    padding: .618em 1em;
+}
