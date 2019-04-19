@@ -10,7 +10,6 @@ License URI: https://opensource.org/licenses/MIT
 
 Keyword research and insights for SEOs. Get performance data from Google Search Console. Visalize content as a tag cloud.
 
-
 == Description ==
 Everyone is using the same SEO plugins. We believe SEO is not a plugin but a process. That's where AISee comes in.
 
