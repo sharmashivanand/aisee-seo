@@ -11,7 +11,7 @@ class AISee_GSC{
     }
 
     function hooks(){
-        add_action( 'aisee_metaboxes', array( $this,'add_meta_boxes' ) ); // add metaboxes
+        //add_action( 'aisee_metaboxes', array( $this,'add_meta_boxes' ) ); // add metaboxes
         
         add_action( 'admin_init', array($this, 'save_gsc_profile' ));
 

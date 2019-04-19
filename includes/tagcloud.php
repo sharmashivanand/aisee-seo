@@ -12,13 +12,31 @@ class AISee_TagCloud {
     }
 
     function hooks(){
-        add_action( 'aisee_metaboxes', array( $this,'add_meta_boxes' ) ); // add metaboxes
+        //add_action( 'aisee_metaboxes', array( $this,'add_meta_boxes' ) ); // add metaboxes
+        add_action( 'aisee_mb', array( $this,'aisee_cmb_tag_cloud' ) ); // add metaboxes
         add_action( 'wp_ajax_aisee_tag_cloud', array( $this, 'aisee_tag_cloud' )); // respond to ajax
         add_action( 'wp_ajax_nopriv_aisee_tag_cloud', '__return_false' ); // do not respont to ajax
     }
 
     function add_meta_boxes($post_type) {
         add_meta_box( 'aisee-tag', __( 'AiSee Tag Cloud', 'aisee' ), array($this, 'aisee_tag_cloud_mb'), $post_type, 'normal', 'high');
+    }
+
+    function aisee_cmb_tag_cloud($cmb){
+        $prefix = '_aisee_';
+
+        // Regular text field
+        $cmb->add_field( array(
+            'name'       => __( 'Test Text', 'cmb2' ),
+            'desc'       => __( 'field description (optional)', 'cmb2' ),
+            'id'         => $prefix . 'text',
+            'type'       => 'aisee_ajax_btn',
+            'show_on_cb' => 'cmb2_hide_if_no_cats', // function should return a bool value
+            // 'sanitization_cb' => 'my_custom_sanitization', // custom sanitization callback parameter
+            // 'escape_cb'       => 'my_custom_escaping',  // custom escaping callback parameter
+            // 'on_front'        => false, // Optionally designate a field to wp-admin only
+            // 'repeatable'      => true,
+        ) );
     }
 
     function aisee_tag_cloud_mb(){

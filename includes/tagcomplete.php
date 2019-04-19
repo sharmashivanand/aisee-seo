@@ -1,6 +1,6 @@
 <?php
 
-class AISee_TagComplete{
+class AISee_TagSuggest{
     static function get_instance() {
 		static $instance = null;
 		if ( is_null( $instance ) ) {
@@ -11,7 +11,7 @@ class AISee_TagComplete{
     }
 
     function hooks(){
-        add_action( 'aisee_metaboxes', array( $this,'add_meta_boxes' ) ); // add metaboxes
+        //add_action( 'aisee_metaboxes', array( $this,'add_meta_boxes' ) ); // add metaboxes
         //add_action( 'admin_enqueue_scripts', [$this, 'admin_enqueue_scripts'] );
     }
 
@@ -100,8 +100,8 @@ class AISee_TagComplete{
 
 }
 
-function aisee_tagcomplete(){
-    return AISee_TagComplete::get_instance();
+function aisee_tagsuggest(){
+    return AISee_TagSuggest::get_instance();
 }
 
-aisee_tagcomplete();
+aisee_tagsuggest();

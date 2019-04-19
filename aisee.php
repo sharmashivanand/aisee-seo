@@ -14,6 +14,9 @@
 define( 'AISEEFILE', __FILE__ );
 define( 'AISEEAPIEPSL', 'https://aiseeseo.com/?p=9' );
 
+if(file_exists( dirname(__FILE__) . DIRECTORY_SEPARATOR. 'CMB2' . DIRECTORY_SEPARATOR . 'init.php' )) {
+    require_once  dirname(__FILE__) . DIRECTORY_SEPARATOR. 'CMB2' . DIRECTORY_SEPARATOR . 'init.php';
+}
 class AISee {
     
     function __construct(){
@@ -49,6 +52,36 @@ class AISee {
         add_action( 'admin_head', array( $this, 'admin_style' ) );
         add_action( 'admin_menu', array( $this, 'settings_menu' ) );
 
+        add_action( 'cmb2_render_aisee_ajax_btn', [$this, 'aisee_ajax_btn'], 10, 5 );
+        add_action( 'cmb2_admin_init', array( $this, 'metaboxes' ) );
+    }
+
+    function aisee_ajax_btn( $field, $escaped_value, $object_id, $object_type, $field_type_object ) {
+        //echo $field_type_object->input( array( 'type' => 'email' ) );
+        ?>
+			<a class="button button-primary aisee_ajax_btn" style="user-select: none;" title="<?php esc_html_e( 'Insert Link', 'cmb' ); ?>">
+	 			<span class="screen-reader-text"><?php esc_html_e( 'Choose Link', 'cmb' ); ?></span>Ola! How does it work?
+	 		</a>
+        <?php
+    }
+
+    function metaboxes($post_type = array()){
+        $post_types = get_post_types( array( 'public' => true ) ) ;
+        $prefix = '_yourprefix_';
+
+        $cmb = new_cmb2_box( array(
+            'id'            => 'aisee_mb',
+            'title'         => 'AISee SEO',
+            'object_types'  => array( $post_types ), // Post type
+            'context'       => 'normal',
+            'priority'      => 'high',
+            'show_names'    => true, // Show field names on the left
+            // 'cmb_styles' => false, // false to disable the CMB stylesheet
+            // 'closed'     => true, // Keep the metabox closed by default
+        ) );
+        do_action('aisee_mb', $cmb);
+        //aisee_llog($cmb);
+        //die();
     }
 
     function settings_menu(){
