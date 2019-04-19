@@ -14,9 +14,15 @@
 define( 'AISEEFILE', __FILE__ );
 define( 'AISEEAPIEPSL', 'https://aiseeseo.com/?p=9' );
 
-if(file_exists( dirname(__FILE__) . DIRECTORY_SEPARATOR. 'CMB2' . DIRECTORY_SEPARATOR . 'init.php' )) {
-    require_once  dirname(__FILE__) . DIRECTORY_SEPARATOR. 'CMB2' . DIRECTORY_SEPARATOR . 'init.php';
+if(file_exists( dirname(__FILE__) . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'cmb2' . DIRECTORY_SEPARATOR . 'init.php' ) ) {
+    require_once  dirname(__FILE__) . DIRECTORY_SEPARATOR. 'modules' . DIRECTORY_SEPARATOR . 'cmb2' . DIRECTORY_SEPARATOR . 'init.php' ;
 }
+
+if(file_exists( dirname(__FILE__) . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'cmb2-tabs' . DIRECTORY_SEPARATOR . 'cmb2-tabs.php' ) ) {
+    require_once  dirname(__FILE__) . DIRECTORY_SEPARATOR. 'modules' . DIRECTORY_SEPARATOR . 'cmb2-tabs' . DIRECTORY_SEPARATOR . 'cmb2-tabs.php' ;
+}
+
+
 class AISee {
     
     function __construct(){
