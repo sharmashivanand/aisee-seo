@@ -77,3 +77,10 @@
 .aisee_suggestions li{
     padding: .618em 1em;
 }
+
+#_aisee_metabox .cmb-tabs-wrap .cmb-tabs .cmb-tab.active {
+    background-color: hsl(0, 0%, 100%);
+    position: relative;
+    margin-right: -5px;
+    border-left: 5px solid hsl(195, 100%, 50%);
+}
