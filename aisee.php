@@ -23,6 +23,10 @@ if ( file_exists( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'modules' . DIRECT
 	require_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'cmb2-tabs' . DIRECTORY_SEPARATOR . 'cmb2-tabs.php';
 }
 
+if ( file_exists( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'cmb-field-select2' . DIRECTORY_SEPARATOR . 'cmb-field-select2.php' ) ) {
+	require_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'cmb-field-select2' . DIRECTORY_SEPARATOR . 'cmb-field-select2.php';
+}
+
 
 class AISee {
 

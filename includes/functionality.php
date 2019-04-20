@@ -28,21 +28,27 @@ class AISee_Functionality {
 
 		$tabs[] = array(
 			'details' => array(
-				'id'    => 'tab-1',
+				'id'    => 'general',
 				'icon'  => '',
 				'title' => 'General',
 
 			),
 			'fields'  => array(
 				array(
-					'id'   => AISEEPREFIX . '_field_1',
-					'name' => 'Field 1',
-					'type' => 'text',
+					'id'   => AISEEPREFIX . 'title',
+					'name' => 'Title',
+					'type' => 'pw_select',
+					'options' => array(
+						'5'  => '5 minutes',
+						'10' => '10 minutes',
+						'30' => 'Half an hour',
+						'60' => '1 hour',
+					),
 				),
 				array(
-					'id'   => AISEEPREFIX . '_field_2',
-					'name' => 'Field 2',
-					'type' => 'text',
+					'id'   => AISEEPREFIX . 'description',
+					'name' => 'Description',
+					'type' => 'textarea_small',
 				),
 			),
 		);
