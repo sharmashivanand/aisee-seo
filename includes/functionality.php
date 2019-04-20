@@ -35,9 +35,9 @@ class AISee_Functionality {
 			),
 			'fields'  => array(
 				array(
-					'id'   => AISEEPREFIX . 'title',
-					'name' => 'Title',
-					'type' => 'pw_select',
+					'id'      => AISEEPREFIX . 'title',
+					'name'    => 'Title',
+					'type'    => 'pw_select',
 					'options' => array(
 						'5'  => '5 minutes',
 						'10' => '10 minutes',
@@ -93,16 +93,16 @@ class AISee_Functionality {
 			),
 			'fields'  => array(
 				array(
-					'id'   => AISEEPREFIX . 'robots',
-					'type' => 'multicheck',
+					'id'                => AISEEPREFIX . 'robots',
+					'type'              => 'multicheck',
 					'select_all_button' => false,
-					'name' => 'Robots Meta',
-					'options' => array(
-						'noindex' => 'No Index',
-						'nofollow' => 'No Follow',
+					'name'              => 'Robots Meta',
+					'options'           => array(
+						'noindex'      => 'No Index',
+						'nofollow'     => 'No Follow',
 						'noimageindex' => 'No Image Index',
-						'noarchive' => 'No Archive',
-						'nosnippet' => 'No Snippet',
+						'noarchive'    => 'No Archive',
+						'nosnippet'    => 'No Snippet',
 					),
 				),
 				array(
