@@ -27,11 +27,12 @@ class AISee_TagCloud {
 
         // Regular text field
         $cmb->add_field( array(
-            'name'       => __( 'Test Text', 'cmb2' ),
-            'desc'       => __( 'field description (optional)', 'cmb2' ),
-            'id'         => $prefix . 'text',
-            'type'       => 'aisee_ajax_btn',
-            'show_on_cb' => 'cmb2_hide_if_no_cats', // function should return a bool value
+            'name'       => __( 'Register', 'cmb2' ),
+            'desc'       => __( 'You haven\'t registered yet', 'cmb2' ),
+            'id'         => $prefix . 'register',
+            'type'       => 'aisee_ajax_control',
+            //'show_names' => false,
+            //'show_on_cb' => 'cmb2_hide_if_no_cats', // function should return a bool value
             // 'sanitization_cb' => 'my_custom_sanitization', // custom sanitization callback parameter
             // 'escape_cb'       => 'my_custom_escaping',  // custom escaping callback parameter
             // 'on_front'        => false, // Optionally designate a field to wp-admin only
