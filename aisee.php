@@ -58,7 +58,7 @@ class AISee {
 	}
 
 	function hooks() {
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] ); // add metaboxes
+		// add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] ); // add metaboxes
 		add_action( 'admin_enqueue_scripts', [ $this, 'plugin_styles' ] ); // enqueue plugin styles but only on the specific screen
 		add_action( 'admin_init', [ $this, 'plugin_data' ] );
 		add_action( 'admin_head', [ $this, 'admin_style' ] );
@@ -70,11 +70,11 @@ class AISee {
 
 	function aisee_ajax_control( $field, $escaped_value, $object_id, $object_type, $field_type_object ) {
 		?>
-		<div class="aisee-ajax-response" id="<?php echo $field->id(); ?>_response"></div>
 			<a class="button button-primary aisee_ajax_btn" style="user-select: none;" title="<?php echo $field->desc(); ?>" id="<?php echo $field->id(); ?>">
 				 <span class="screen-reader-text"><?php echo $field->desc(); ?></span><?php echo $field->name(); ?>
 			 </a>
-			<p><?php echo $field->desc(); ?></p>
+            <p><?php echo $field->desc(); ?></p>
+            <div class="aisee-ajax-response" id="<?php echo $field->id(); ?>_response"></div>
 		<?php
 	}
 
@@ -109,11 +109,11 @@ class AISee {
 
 		$cmb = new_cmb2_box(
 			array(
-				'id'            => $prefix . 'metabox',
-				'title'         => __( 'AISee SEO', 'cmb2' ),
-				'object_types'  => $post_types, // Post type
-				'vertical_tabs' => true, // Set vertical tabs, default false
-				'tabs'          => $tabs,
+				'id'           => $prefix . 'metabox',
+				'title'        => __( 'AISee SEO', 'cmb2' ),
+				'object_types' => $post_types, // Post type
+				// 'vertical_tabs' => true, // Set vertical tabs, default false
+				'tabs'         => $tabs,
 			)
 		);
 
@@ -207,7 +207,17 @@ class AISee {
 	function plugin_styles() {
 		$screen = get_current_screen();
 		if ( in_array( $screen->post_type, get_post_types( array( 'public' => true ) ) ) ) {
-			wp_enqueue_style( 'aisee-stylesheet', $this->uri . 'assets/admin-styles.css' );
+            global $post;
+            $aisee_tag_cloud_nonce = wp_create_nonce( 'aisee_tag_cloud' );
+			wp_enqueue_style( 'aisee-admin', $this->uri . 'assets/admin-styles.css' );
+			wp_enqueue_style( 'aisee-select2', $this->uri . 'assets/select2.min.css' );
+			wp_enqueue_script( 'aisee-select2', $this->uri . 'assets/select2.min.js' );
+            wp_enqueue_script( 'aisee-admin', $this->uri . 'assets/aisee-admin.js' );
+            wp_localize_script('aisee-admin', 'aisee', array(
+                'gl' => timezone_location_get( new DateTimeZone( get_option( 'timezone_string' ) ) )['country_code'],
+                'post_id' =>  $post->ID,
+                'aisee_tag_cloud_nonce' => $aisee_tag_cloud_nonce
+            ));
 		}
 	}
 

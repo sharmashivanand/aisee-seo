@@ -16,12 +16,10 @@ class AISee_Functionality {
 	}
 
 	function hooks() {
-		// add_action( 'aisee_mb', [ $this, 'fields' ] );
 		add_action( 'aisee_tabs', [ $this, 'general' ] );
+		add_action( 'aisee_tabs', [ $this, 'social' ] );
 		add_action( 'aisee_tabs', [ $this, 'schema' ] );
 		add_action( 'aisee_tabs', [ $this, 'meta' ] );
-		add_action( 'aisee_tabs', [ $this, 'social' ] );
-		// add_action( 'aisee_tabs', [ $this, 'social' ] );
 	}
 
 	function general( $tabs ) {
@@ -29,7 +27,7 @@ class AISee_Functionality {
 		$tabs[] = array(
 			'details' => array(
 				'id'    => 'general',
-				'icon'  => '',
+				'icon'  => 'dashicons-admin-generic',
 				'title' => 'General',
 
 			),
@@ -37,18 +35,28 @@ class AISee_Functionality {
 				array(
 					'id'      => AISEEPREFIX . 'title',
 					'name'    => 'Title',
-					'type'    => 'pw_select',
-					'options' => array(
-						'5'  => '5 minutes',
-						'10' => '10 minutes',
-						'30' => 'Half an hour',
-						'60' => '1 hour',
-					),
+					'type'    => 'text',
+					
 				),
 				array(
 					'id'   => AISEEPREFIX . 'description',
 					'name' => 'Description',
 					'type' => 'textarea_small',
+				),
+				array(
+					'id'   => AISEEPREFIX . 'focuskw_suggestions',
+					'name' => 'Focus Keywords',
+                    'type' => 'text',
+                    'options' => array(
+                        'flour'  => 'Flour',
+                        'salt'   => 'Salt',
+                        'eggs'   => 'Eggs',
+                        'milk'   => 'Milk',
+                        'butter' => 'Butter',
+                    ),
+                    'attributes' => array(
+                        'dropdownAutoWidth' => 'false'
+                    )
 				),
 			),
 		);
@@ -60,8 +68,8 @@ class AISee_Functionality {
 
 		$tabs[] = array(
 			'details' => array(
-				'id'    => 'tab-2',
-				'icon'  => '',
+				'id'    => 'schema',
+				'icon'  => 'dashicons-star-filled',
 				'title' => 'Schema',
 
 			),
@@ -87,7 +95,7 @@ class AISee_Functionality {
 		$tabs[] = array(
 			'details' => array(
 				'id'    => 'meta',
-				'icon'  => '',
+				'icon'  => 'dashicons-admin-tools',
 				'title' => 'Meta',
 
 			),
@@ -121,7 +129,7 @@ class AISee_Functionality {
 		$tabs[] = array(
 			'details' => array(
 				'id'    => 'tab-2',
-				'icon'  => '',
+				'icon'  => 'dashicons-share',
 				'title' => 'Social',
 
 			),
@@ -140,31 +148,6 @@ class AISee_Functionality {
 		);
 
 		return $tabs;
-	}
-
-	function fields( $cmb ) {
-		$prefix = 'your_prefix_demo_';
-
-		$cmb->tabs[] = array(
-			array(
-				'id'     => 'tab-1',
-				'icon'   => 'dashicons-admin-site',
-				'title'  => 'Tab 1',
-				'fields' => array(
-					$prefix . '_field_1',
-					$prefix . '_field_2',
-				),
-			),
-		);
-
-		$cmb->add_field(
-			array(
-				'name' => __( 'Test field 2', 'cmb2' ),
-				'id'   => $prefix . '_field_2',
-				'type' => 'text',
-			)
-		);
-
 	}
 
 }

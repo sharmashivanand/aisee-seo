@@ -36,20 +36,16 @@ class AISee_TagSuggest {
 
 	function aisee_suggestions_mb() {
 		echo '<input type="text" id="aisee_suggestions" />';
-
 		?>
 		<script type="text/javascript">
 		jQuery(document).ready(function ($) { //wrapper
-			
 			$('#aisee_suggestions').autocomplete({
 				minChars: 1,
 				source: function (term, suggest) {
-					
 					var promise = googleSuggest();
 					returnSearch = function (term, choices) {
 						suggest(choices);
 					}
-
 					jQuery.when(promise).then(function (data) {
 						term = term.toString().toLowerCase();
 						var result = [];
@@ -64,7 +60,6 @@ class AISee_TagSuggest {
 					"ui-autocomplete": "highlight"
 				}
 			}).autocomplete( "widget" ).addClass( "aisee_suggestions" ).removeClass( "ui-widget ui-front ui-menu ui-widget-content" );
-
 			function googleSuggest(returnSearch) {
 				var term = jQuery('#aisee_suggestions').val();
 				var service = {
@@ -76,7 +71,6 @@ class AISee_TagSuggest {
 					web: { client: 'hp', ds: '' },
 					recipes: { client: 'hp', ds: 'r' }
 				};
-
 				var promise = jQuery.ajax({
 					url: 'https://clients1.google.com/complete/search',
 					dataType: 'jsonp',
@@ -89,7 +83,6 @@ class AISee_TagSuggest {
 						ds: service.web.ds
 					}
 				})
-
 				return promise
 			};
 			
@@ -97,11 +90,10 @@ class AISee_TagSuggest {
 		</script>
 		<?php
 	}
-
 }
 
 function aisee_tagsuggest() {
 	return AISee_TagSuggest::get_instance();
 }
 
-aisee_tagsuggest();
+//aisee_tagsuggest();

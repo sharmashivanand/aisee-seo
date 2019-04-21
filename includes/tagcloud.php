@@ -15,8 +15,58 @@ class AISee_TagCloud {
 		// add_action( 'aisee_metaboxes', array( $this,'add_meta_boxes' ) ); // add metaboxes
 		add_action( 'aisee_mb', array( $this, 'aisee_cmb_tag_cloud' ) ); // add metaboxes
 		add_action( 'wp_ajax_aisee_tag_cloud', array( $this, 'aisee_tag_cloud' ) ); // respond to ajax
-		add_action( 'wp_ajax_nopriv_aisee_tag_cloud', '__return_false' ); // do not respont to ajax
-	}
+        add_action( 'wp_ajax_nopriv_aisee_tag_cloud', '__return_false' ); // do not respont to ajax
+        
+        add_action( 'aisee_tabs', [ $this, 'tag_cloud_tab' ] );
+    }
+    
+    function tag_cloud_tab($tabs){
+        
+        $tabs[] = array(
+			'details' => array(
+				'id'    => 'keyword_cloud',
+				'icon'  => 'dashicons-star-filled',
+				'title' => 'Keyword Cloud',
+
+			),
+			'fields'  => array(
+                array(
+                    'id' => AISEEPREFIX . 'drop_percentage',
+                    'type' => 'text',
+                    'name' => 'Drop Threshold',
+                    'desc' => 'Drop words with density less than this percentage',
+                    'attributes' => array(
+                        'type' => 'number',
+                        'pattern' => '\d*',
+                        'min' => '0',
+                        'max' => '1',
+                        'step' => '0.1'
+                    ),
+                ),
+                array(
+                    'id' => AISEEPREFIX . 'trim_length',
+                    'type' => 'text',
+                    'name' => 'Minimum Characters',
+                    'desc' => 'Ignore words containing less than these many characters',
+                    'default' => '2',
+                    'attributes' => array(
+                        'type' => 'number',
+                        'pattern' => '\d*',
+                        'min' => '0',
+                        'max' => '5',
+                        'step' => '1',
+                    ),
+                ),
+				array(
+					'id'   => AISEEPREFIX . 'aisee_tag_cloud',
+					'type' => 'aisee_ajax_control',
+                    'name' => 'Generate Tag Cloud',
+                    'show_names' => false,
+				),
+			),
+		);
+        return $tabs;
+    }
 
 	function add_meta_boxes( $post_type ) {
 		add_meta_box( 'aisee-tag', __( 'AiSee Tag Cloud', 'aisee' ), array( $this, 'aisee_tag_cloud_mb' ), $post_type, 'normal', 'high' );
