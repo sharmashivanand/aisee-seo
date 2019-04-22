@@ -50,11 +50,11 @@ class AISee {
 	}
 
 	function includes() {
-		require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'functions.php';
+        require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'functions.php';
+		require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'functionality.php';
 		require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'gsc.php';
 		require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'tagcloud.php';
 		require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'tagcomplete.php';
-		require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'functionality.php';
 	}
 
 	function hooks() {
@@ -204,8 +204,12 @@ class AISee {
 		}
 	}
 
-	function plugin_styles() {
-		$screen = get_current_screen();
+	function plugin_styles($hook) {
+        $screen = get_current_screen();
+        if($hook == 'edit.php') { // don't hook on post list screen
+            return;
+        }
+        
 		if ( in_array( $screen->post_type, get_post_types( array( 'public' => true ) ) ) ) {
             global $post;
             $aisee_tag_cloud_nonce = wp_create_nonce( 'aisee_tag_cloud' );
