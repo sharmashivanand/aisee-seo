@@ -1,5 +1,8 @@
 jQuery(document).ready(function ($) { //wrapper
-    $('#_aisee_focuskw_suggestions').autocomplete({
+    	if( $('#_aisee_focuskw_suggestions').length == 0 ){
+	return;
+	}
+	$('#_aisee_focuskw_suggestions').autocomplete({
         minChars: 1,
         source: function (term, suggest) {
             var promise = googleSuggest();
