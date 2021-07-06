@@ -4,12 +4,11 @@ Tags: seo, google search console, content analysis, keyword research, search opt
 Requires at least: 3.7.4
 Tested up to: 5.1
 Requires PHP: 7.0
-Stable tag: 2.1
+Stable tag: 2.2
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
 Keyword research and insights for SEOs. Get performance data from Google Search Console. Visalize content as a tag cloud.
-
 
 == Description ==
 Everyone is using the same SEO plugins. We believe SEO is not a plugin but a process. That's where AISee comes in.

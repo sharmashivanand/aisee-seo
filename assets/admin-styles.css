@@ -63,94 +63,17 @@
     color: #000 !important;
 }
 
+
 /* #aisee-register {
     padding: .618em 1em;
     margin-bottom: .618em;
     box-sizing: content-box;
 } */
 
-.aisee_suggestions {
+.aisee_suggestions{
     box-sizing: border-box;
 }
 
-.aisee_suggestions li {
+.aisee_suggestions li{
     padding: .618em 1em;
-}
-
-#_aisee_metabox input:not([type="checkbox"]),
-textarea,
-select {
-    width: 100% !important;
-}
-
-#_aisee_metabox [class^='select2'] {
-    border-radius: 0px !important;
-}
-
-#_aisee_metabox .cmb-type-group .cmb-repeatable-group:not(:last-of-type),
-#_aisee_metabox .cmb-type-group .cmb-row:not(:last-of-type),
-#_aisee_metabox .cmb-repeatable-group:not(:last-of-type),
-#_aisee_metabox .cmb-row:not(:last-of-type) {
-    border-bottom: 0;
-}
-
-#_aisee_metabox .cmb-tab-icon {
-    margin-right: 0;
-}
-
-#_aisee_metabox .cmb-tabs {
-    font-weight: 600;
-}
-
-#_aisee_metabox .cmb-tab {
-    padding: 0.618em 1.168em;
-    background: hsl(240, 100%, 99%);
-}
-
-#_aisee_metabox .cmb-tabs-horizontal .cmb-tab {
-    border-top: 1px solid #eee;
-}
-
-#_aisee_metabox .cmb-tabs-horizontal .cmb-tab:first-of-type {
-    border-left: 1px solid #eee;
-}
-
-#_aisee_metabox .cmb-tabs-vertical .cmb-tab {
-    border-left: 1px solid #eee;
-}
-
-#_aisee_metabox .cmb-tabs-vertical .cmb-tab:first-of-type {
-    border-top: 1px solid #eee;
-}
-
-#_aisee_metabox .cmb-tab,
-#_aisee_metabox .cmb-tab-title,
-#_aisee_metabox label {
-    user-select: none;
-}
-
-#_aisee_metabox .cmb-tabs-horizontal .cmb-tabs .cmb-tab.active {
-    background-color: hsl(0, 0%, 100%);
-    margin-bottom: -2px;
-    border-top: 2px solid dodgerblue;
-    color: dodgerblue;
-}
-
-#_aisee_metabox .cmb-tabs-horizontal .cmb-tabs {
-    padding: 1em 1em 0em;
-}
-
-#_aisee_metabox .cmb-tabs-horizontal .cmb2-wrap {
-    padding-left: calc(12px + 2em);
-    padding-right: calc(12px + 2em);
-}
-
-#_aisee_metabox .cmb-tabs-vertical .cmb-tabs .cmb-tab.active {
-    background-color: hsl(0, 0%, 100%);
-    margin-right: -2px;
-    border-left: 2px solid dodgerblue;
-}
-
-#_aisee_metabox .cmb-tabs-vertical .cmb-tabs {
-    padding: 1em 0em 1em 1em;
 }
