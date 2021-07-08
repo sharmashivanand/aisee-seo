@@ -20,6 +20,9 @@ class AISee_GSC {
 
 		add_action( 'wp_ajax_aisee_update_filter', array( $this, 'aisee_update_filter' ) ); // respond to ajax
 		add_action( 'wp_ajax_nopriv_aisee_update_filter', '__return_false' ); // do not respont to ajax
+		
+		add_action( 'wp_ajax_aisee_generate_tags', array( $this, 'aisee_generate_tags' ) ); // respond to ajax
+		add_action( 'wp_ajax_nopriv_aisee_generate_tags', '__return_false' ); // do not respont to ajax
 
 		add_action( 'wp_ajax_aisee_gsc_fetch', array( $this, 'aisee_gsc_fetch' ) ); // respond to ajax
 		add_action( 'wp_ajax_nopriv_aisee_gsc_fetch', '__return_false' ); // do not respont to ajax
@@ -121,7 +124,7 @@ class AISee_GSC {
 					echo '</p>';
 
 					?>
-					<div id="aiseeseo_gsc_settings"><h3 style="font-weight:500">Keyword filter</h3>
+					<div id="aiseeseo_gsc_settings"><h3 style="font-weight:500">Keyword Filter</h3>
 					<p><strong>Narrow down to keywords that match the following criteria:</strong></p>
 					<!--<p>Clicks between</p> <div id="aiseeseo_clicks" class="aiseeseo_slider"></div> 
 					<p>Impressions between</p> <div id="aiseeseo_impressions" class="aiseeseo_slider"></div>-->
@@ -130,9 +133,41 @@ class AISee_GSC {
 					 <p>Average position between <span id="aiseeseo_position_min"></span> and <span id="aiseeseo_position_max"></p> <div id="aiseeseo_position" class="aiseeseo_slider"></div>
 					<input type="button" value="Reset Filter to Defaults" id="aiseeseo_gsc_settings_reset" />
 					<div id="aiseeseo_ajax_status"></div>
+					<p><?php submit_button( 'Generate Tags &rarr;', 'primary', 'aisee_generate_tags', false ); ?></p>
 					</div>
 					<script type="text/javascript">
 					jQuery(document).ready(function ($) { //wrapper
+					
+						$('#aisee_generate_tags').click(function(e){
+							aisee_generate_tags = {
+								aisee_generate_tags_nonce: '<?php echo wp_create_nonce( 'aisee_generate_tags' ); ?>',
+								action: "aisee_generate_tags",
+							};
+							
+							$.ajax({
+								url: ajaxurl,
+								method: 'POST',
+								data: aisee_generate_tags,
+								complete: function(jqXHR, textStatus){
+									// console.dir(jqXHR);
+									// console.dir(typeof jqXHR.responseJSON.success);
+									if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('success')){ // success
+										// success / fadeout
+										if(jqXHR.responseJSON.success) {
+											$('#aiseeseo_ajax_status').html('<div class="aiseeseo_status_success aiseeseo_status">Settings Updated</div>').fadeOut(10000);
+										}
+										else {
+											$('#aiseeseo_ajax_status').html('<div class="aiseeseo_status_error aiseeseo_status">Couldn\'t save settings!</div>').fadeOut(10000);
+										}
+									}
+									else { // no response json
+										$('#aiseeseo_ajax_status').html('<div class="aiseeseo_status_error aiseeseo_status">Failed to get a valid response!</div>').fadeOut(10000);
+									}
+								},
+								success: function (response) {
+								} // initialize
+							}); // ajax post
+						});
 						/*
 						$( "#aiseeseo_clicks" ).slider({
 							range: true,
@@ -360,6 +395,11 @@ class AISee_GSC {
 
 	function aisee_update_filter() {
 		check_ajax_referer( 'aisee_update_filter', 'aisee_update_filter_nonce' );
+		wp_send_json_error( $_REQUEST );
+	}
+
+	function aisee_generate_tags() {
+		check_ajax_referer( 'aisee_generate_tags', 'aisee_generate_tags_nonce' );
 		wp_send_json_error( $_REQUEST );
 	}
 
