@@ -1,3 +1,11 @@
+/*
+.postbox-container .postbox{
+    margin: 1em;
+    border: 1px solid red;
+    border-bottom: 1px solid green;
+}
+*/
+
 #aisee-tag.postbox p.submit {
     float: none;
 }
@@ -5,6 +13,25 @@
 #aisee-tag-cloud {
     text-align: center;
     text-transform: uppercase;
+}
+
+.aiseeseo_slider {
+    margin: .618em 0;
+    width: 50%;
+}
+
+.aiseeseo_status {
+    padding: .618em 1em;
+    border: 1px solid gray;
+    color: white;
+}
+
+.aiseeseo_status_success {
+    background: green;
+}
+
+.aiseeseo_status_error {
+    background: red;
 }
 
 .aitag {
@@ -70,10 +97,10 @@
     box-sizing: content-box;
 } */
 
-.aisee_suggestions{
+.aisee_suggestions {
     box-sizing: border-box;
 }
 
-.aisee_suggestions li{
+.aisee_suggestions li {
     padding: .618em 1em;
 }
