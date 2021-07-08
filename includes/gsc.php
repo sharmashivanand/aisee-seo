@@ -18,6 +18,9 @@ class AISee_GSC {
 		add_action( 'wp_ajax_aisee_register', array( $this, 'aisee_register' ) ); // respond to ajax
 		add_action( 'wp_ajax_nopriv_aisee_register', '__return_false' ); // do not respont to ajax
 
+		add_action( 'wp_ajax_aisee_update_filter', array( $this, 'aisee_update_filter' ) ); // respond to ajax
+		add_action( 'wp_ajax_nopriv_aisee_update_filter', '__return_false' ); // do not respont to ajax
+
 		add_action( 'wp_ajax_aisee_gsc_fetch', array( $this, 'aisee_gsc_fetch' ) ); // respond to ajax
 		add_action( 'wp_ajax_nopriv_aisee_gsc_fetch', '__return_false' ); // do not respont to ajax
 
@@ -118,65 +121,152 @@ class AISee_GSC {
 					echo '</p>';
 
 					?>
-					<div id="aiseeseo_settings"><h3 style="font-weight:500">Keyword filter</h3>
+					<div id="aiseeseo_gsc_settings"><h3 style="font-weight:500">Keyword filter</h3>
 					<p><strong>Narrow down to keywords that match the following criteria:</strong></p>
-					<p>Clicks between</p> <div id="aiseeseo_clicks" class="aiseeseo_slider"></div> 
-					<p>Impressions between</p> <div id="aiseeseo_impressions" class="aiseeseo_slider"></div>
-					<p>CTR between</p> <div id="aiseeseo_ctr" class="aiseeseo_slider"></div>
-					<p>Average position between</p> <div id="aiseeseo_position" class="aiseeseo_slider"></div>
+					<!--<p>Clicks between</p> <div id="aiseeseo_clicks" class="aiseeseo_slider"></div> 
+					<p>Impressions between</p> <div id="aiseeseo_impressions" class="aiseeseo_slider"></div>-->
+					<p>CTR between <span id="aiseeseo_ctr_min"></span> and <span id="aiseeseo_ctr_max"></span></p> <div id="aiseeseo_ctr" class="aiseeseo_slider"></div>
+					
+					 <p>Average position between <span id="aiseeseo_position_min"></span> and <span id="aiseeseo_position_max"></p> <div id="aiseeseo_position" class="aiseeseo_slider"></div>
+					<input type="button" value="Reset Filter to Defaults" id="aiseeseo_gsc_settings_reset" />
 					<div id="aiseeseo_ajax_status"></div>
 					</div>
 					<script type="text/javascript">
 					jQuery(document).ready(function ($) { //wrapper
-						
+						/*
 						$( "#aiseeseo_clicks" ).slider({
 							range: true,
 							max: 100,
 							min:0,
 							step: 0.1,
 							values : [33,66],
-							change: aisee_update_filter,
+							change: aisee_save_filter_values,
 						});
 
 						$( "#aiseeseo_impressions" ).slider({
 							step: 0.1,
 							value: 1,
-							change: aisee_update_filter,
+							change: aisee_save_filter_values,
 						});
+						*/
 
+						<?php
+						$defaults = aisee_defaults();
+						$defaults = $defaults['gsc_filter'];
+						$defaults = json_encode( $defaults );
+
+						$gsc_filter = aisee_get_setting( 'gsc_filter' );
+						$gsc_filter = json_encode( $gsc_filter );
+
+						?>
+						aisee_defaults = <?php echo $defaults; ?>;
+						//console.dir(aisee_defaults);
+						gsc_filter = <?php echo $gsc_filter; ?>;
+						console.dir(gsc_filter);
 						$( "#aiseeseo_ctr" ).slider({
 							range: true,
+							min: 0,
 							max: 100,
-							min:0,
-							step: 0.1,
-							values : [33,66],
-							change: aisee_update_filter,
+							step: 1,
+							values: [gsc_filter.ctr.min,gsc_filter.ctr.max],
+							change: aisee_save_filter_values,
+							slide: aisee_sync_from_sliders
 						});
-
 						$( "#aiseeseo_position" ).slider({
-							step: 0.1,
-							value : 20,
-							change: aisee_update_filter,
+							range: true,
+							min: 1,
+							max: 100,
+							step: 1,
+							values: [gsc_filter.position.min,gsc_filter.position.max],
+							change: aisee_save_filter_values,
+							slide: aisee_sync_from_sliders
+						});
+						$('#aiseeseo_ctr_min').html(gsc_filter.ctr.min);
+						$('#aiseeseo_ctr_max').html(gsc_filter.ctr.max);
+						$('#aiseeseo_position_min').html(gsc_filter.position.min);
+						$('#aiseeseo_position_max').html(gsc_filter.position.max);
+
+						function aisee_sync_from_sliders(occurance, ui){
+
+							if(ui.handleIndex == 0) {
+								$('#'+$(this).attr('id') + '_min').html(ui.value);
+								$str = $(this).attr('id') + '_min';
+								$str = $str.split('_');
+								//console.log($str);
+								gsc_filter[$str[1]][$str[2]] = ui.value
+								
+							}
+							if(ui.handleIndex == 1) {
+								$('#'+$(this).attr('id') + '_max').html(ui.value);
+								$str = $(this).attr('id') + '_max';
+								$str = $str.split('_');
+								//console.log($str);
+								gsc_filter[$str[1]][$str[2]] = ui.value
+							}
+							//console.dir();
+						}
+
+						$('#aiseeseo_gsc_settings_reset').click(function(e){
+							e.preventDefault();
+							//console.dir(aisee_defaults);
+							console.dir(aisee_defaults.ctr.min);
+							console.dir(aisee_defaults.ctr.max);
+							console.dir(aisee_defaults.position.min);
+							console.dir(aisee_defaults.position.max);
+
+							// need these first because change eventhandler will fetch from these values when the event fires
+							gsc_filter.ctr.min = aisee_defaults.ctr.min;
+							gsc_filter.ctr.max = aisee_defaults.ctr.max;
+							gsc_filter.position.min = aisee_defaults.position.min;
+							gsc_filter.position.max = aisee_defaults.position.max;
+
+							$( "#aiseeseo_ctr" ).slider( "values", 0, aisee_defaults.ctr.min );
+							$( "#aiseeseo_ctr" ).slider( "values", 1, aisee_defaults.ctr.max );
+							$( "#aiseeseo_position" ).slider( "values", 0, aisee_defaults.position.min );
+							$( "#aiseeseo_position" ).slider( "values", 1, aisee_defaults.position.max );
+
+							$( "#aiseeseo_ctr_min" ).html( aisee_defaults.ctr.min );
+							$( "#aiseeseo_ctr_max" ).html( aisee_defaults.ctr.max );
+							$( "#aiseeseo_position_min" ).html( aisee_defaults.position.min );
+							$( "#aiseeseo_position_max" ).html( aisee_defaults.position.max );
+							
+							
+							console.dir('aiseeseo_gsc_settings_reset');
+							console.dir(gsc_filter);
 						});
 
-						function aisee_update_filter(occurance, ui) {
-							console.dir($(this).attr('id'));
-							console.dir(ui);
-
-							aisee_kw_filter = {
-								aisee_kw_filter_nonce: '<?php echo wp_create_nonce( 'aisee_kw_filter' ); ?>',
-								action: "aisee_kw_filter",
-								postid: '<?php echo $post->ID; ?>',
+						function aisee_save_filter_values(occurance, ui) {
+							console.dir('fired aisee_save_filter_values');
+							// console.dir($(this).attr('id'));
+							// console.dir(occurance);
+							// console.dir(ui);
+							//if(ui.handleIndex == 0) {
+							//	$('#'+$(this).attr('id') + '_min').html(ui.value);
+							//	console.log('targeting:' + '#'+$(this).attr('id') + '_min');
+							//	
+							//}
+							//if(ui.handleIndex == 1) {
+							//	$('#'+$(this).attr('id') + '_max').html(ui.value);
+							//	console.log('targeting:' + '#'+$(this).attr('id') + '_max');
+							//}
+							// console.dir('<?php get_option( 'aiseeseo' ); ?>')
+							console.log(gsc_filter);
+							aisee_update_filter = {
+								aisee_update_filter_nonce: '<?php echo wp_create_nonce( 'aisee_update_filter' ); ?>',
+								action: "aisee_update_filter",
+								gsc_filter: gsc_filter
 							};
+							
 							$.ajax({
 								url: ajaxurl,
 								method: 'POST',
-								data: aisee_kw_filter,
+								data: aisee_update_filter,
 								complete: function(jqXHR, textStatus){
-									console.dir(jqXHR);
+									// console.dir(jqXHR);
+									// console.dir(typeof jqXHR.responseJSON.success);
 									if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('success')){ // success
 										// success / fadeout
-										if(jqXHR.responseJSON.success == true) {
+										if(jqXHR.responseJSON.success) {
 											$('#aiseeseo_ajax_status').html('<div class="aiseeseo_status_success aiseeseo_status">Settings Updated</div>').fadeOut(10000);
 										}
 										else {
@@ -266,6 +356,11 @@ class AISee_GSC {
 			?>
 			</div>
 			<?php
+	}
+
+	function aisee_update_filter() {
+		check_ajax_referer( 'aisee_update_filter', 'aisee_update_filter_nonce' );
+		wp_send_json_error( $_REQUEST );
 	}
 
 	function aisee_gsc_fetch() {

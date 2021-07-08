@@ -18,8 +18,38 @@ function aisee_defaults() {
 	// $defaults = array(
 	// 'connection' => '',
 	// );
-	$defaults = array();
+	$defaults = array(
+		'connection' => array(),
+		'gsc_filter' => array(
+			'ctr'      => array(
+				'min' => 1,
+				'max' => 100,
+			),
+			'position' => array(
+				'min' => 1,
+				'max' => 20,
+			),
+		),
+	);
 	return $defaults;
+}
+
+function aisee_update_setting( $setting, $value ) {
+	$settings = get_option( 'aiseeseo' );
+	if ( ! $settings ) {
+		$settings = array();
+	}
+	$settings[ $setting ] = $value;
+	return update_option( 'aiseeseo', $settings );
+}
+
+function aisee_delete_setting( $setting ) {
+	$settings = get_option( 'aiseeseo' );
+	if ( ! $settings ) {
+		$settings = array();
+	}
+	unset( $settings[ $setting ] );
+	update_option( 'aiseeseo', $settings );
 }
 
 function aisee_sanitize( $settings ) {
