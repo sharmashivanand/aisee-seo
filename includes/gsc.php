@@ -20,7 +20,7 @@ class AISee_GSC {
 
 		add_action( 'wp_ajax_aisee_update_filter', array( $this, 'aisee_update_filter' ) ); // respond to ajax
 		add_action( 'wp_ajax_nopriv_aisee_update_filter', '__return_false' ); // do not respont to ajax
-		
+
 		add_action( 'wp_ajax_aisee_generate_tags', array( $this, 'aisee_generate_tags' ) ); // respond to ajax
 		add_action( 'wp_ajax_nopriv_aisee_generate_tags', '__return_false' ); // do not respont to ajax
 
@@ -142,6 +142,7 @@ class AISee_GSC {
 							aisee_generate_tags = {
 								aisee_generate_tags_nonce: '<?php echo wp_create_nonce( 'aisee_generate_tags' ); ?>',
 								action: "aisee_generate_tags",
+								postid: '<?php echo $post->ID; ?>',
 							};
 							
 							$.ajax({
@@ -400,11 +401,22 @@ class AISee_GSC {
 
 	function aisee_generate_tags() {
 		check_ajax_referer( 'aisee_generate_tags', 'aisee_generate_tags_nonce' );
-		wp_send_json_error( $_REQUEST );
+		$kw = get_post_meta( $id, '_aisee_keywords', true );
+		if ( empty( $kw ) ) {
+			$this->aisee_gsc_fetch( array( 'postid' => $_REQUEST['postid'] ) );
+		}
+		$kw = get_post_meta( $id, '_aisee_keywords', true );
+		if ( empty( $kw ) ) {
+			wp_send_json_error( $_REQUEST );
+		}
+		wp_send_json_success( $_REQUEST );
 	}
 
-	function aisee_gsc_fetch() {
-		check_ajax_referer( 'aisee_gsc_fetch', 'aisee_gsc_fetch_nonce' );
+	function aisee_gsc_fetch( $request = array() ) {
+		if ( wp_doing_ajax() ) {
+			check_ajax_referer( 'aisee_gsc_fetch', 'aisee_gsc_fetch_nonce' );
+			$request = $_REQUEST;
+		}
 		$id  = sanitize_text_field( $_REQUEST['postid'] );
 		$url = $this->get_oauth_link( $id, 'aisee_gsc_fetch' );
 		$url = add_query_arg( 'cb', time(), $url );
