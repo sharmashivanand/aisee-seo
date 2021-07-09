@@ -27,7 +27,7 @@ function aisee_defaults() {
 			),
 			'position' => array(
 				'min' => 1,
-				'max' => 20,
+				'max' => 100,
 			),
 		),
 	);

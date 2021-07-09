@@ -221,14 +221,14 @@ class AISee_GSC {
 							range: true,
 							min: 0,
 							max: 100,
-							step: 1,
+							step: 0.1,
 							values: [gsc_filter.ctr.min,gsc_filter.ctr.max],
 							change: aisee_save_filter_values,
 							slide: aisee_sync_from_sliders
 						});
 						$( "#aiseeseo_position" ).slider({
 							range: true,
-							min: 1,
+							min: 0.1,
 							max: 100,
 							step: 1,
 							values: [gsc_filter.position.min,gsc_filter.position.max],
@@ -452,7 +452,7 @@ class AISee_GSC {
 		// aisee_flog( $posts );
 		foreach ( $posts as $post ) {
 			set_time_limit( $timeout );
-			aisee_flog( 'Generating Tags for: ' . $post->ID . "\t" . $post->post_title );
+			// aisee_flog( 'Generating Tags for: ' . $post->ID . "\t" . $post->post_title );
 			$this->aisee_generate_tags( array( 'postid' => $post->ID ) );
 			// aisee_flog( $post->post_title );
 		}
@@ -478,7 +478,7 @@ class AISee_GSC {
 			}
 		} else {
 			if ( ! empty( $meta['keywords'] ) && is_array( $meta['keywords'] ) ) {
-				aisee_flog( "\taisee_generate_tags processing Post ID " . $request['postid'] . ' MAY get Tags: ' . var_export( $meta, 1 ) );
+				// aisee_flog( "\taisee_generate_tags processing Post ID " . $request['postid'] . ' MAY get Tags: ' . var_export( $meta, 1 ) );
 				$kw         = $meta['keywords'];
 				$gsc_filter = aisee_get_setting( 'gsc_filter' );
 				// aisee_flog( $gsc_filter );
@@ -494,14 +494,14 @@ class AISee_GSC {
 						$stats['position'] <= $gsc_filter['position']['max']
 					) {
 						$valid_terms[] = $stats['keys'];
-						aisee_flog( "\tPost ID " . $request['postid'] . ' will get Tags: ' . $stats['keys'] );
+						// aisee_flog( "\tPost ID " . $request['postid'] . ' will get Tags: ' . $stats['keys'] );
 						wp_insert_term(
 							$stats['keys'], // the term
 							'post_tag', // the taxonomy
 						);
 						// aisee_flog( $stats['keys'] . ' will be added as a tag.' );
 					} else {
-						aisee_flog( "\tPost ID " . $request['postid'] . ' will NOT GET Tags: ' . $stats['keys'] );
+						// aisee_flog( "\tPost ID " . $request['postid'] . ' will NOT GET Tags: ' . $stats['keys'] );
 					}
 				}
 				wp_set_post_tags( $request['postid'], implode( ',', $valid_terms ), false );
@@ -545,6 +545,8 @@ class AISee_GSC {
 				$url,
 				$args
 			);
+			//aisee_flog($url);
+			//aisee_flog($args);
 			if ( is_wp_error( $response ) ) {
 				if ( wp_doing_ajax() ) {
 					wp_send_json_error( $response->get_error_message() );
