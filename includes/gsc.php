@@ -140,6 +140,9 @@ class AISee_GSC {
 					echo '<div id="aisee_gsc_keywords">' . $html . '</div><p>';
 					echo '<a class="button-primary large aisee-btn" id="aisee_gsc_fetch" href="#">Fetch Data from Google&trade; Search Console</a>';
 					echo '</p>';
+					echo '<p>';
+					echo '<a class="button-primary large aisee-btn" id="aisee_gsc_revoke" onclick="window.top.location.href = this.getAttribute(\'data-href\')" data-href="' . $this->get_oauth_link( $post->ID, 'aisee_gsc_revoke' ) . '">Disconnect from AiSee SEO</a>';
+					echo '</p>';
 
 					?>
 					<div id="aiseeseo_gsc_settings"><h3 style="font-weight:500">Keyword Filter</h3>
@@ -545,8 +548,8 @@ class AISee_GSC {
 				$url,
 				$args
 			);
-			//aisee_flog($url);
-			//aisee_flog($args);
+			// aisee_flog($url);
+			// aisee_flog($args);
 			if ( is_wp_error( $response ) ) {
 				if ( wp_doing_ajax() ) {
 					wp_send_json_error( $response->get_error_message() );
@@ -730,6 +733,8 @@ class AISee_GSC {
 				return '<a class="button-primary large aisee-btn" id="' . $action . '" href="' . $auth . '">Connect with Google&trade; Search Console</a>';
 			case 'aisee_gsc_fetch':
 				return '<a class="button-primary large aisee-btn" id="' . $action . '" data-href="' . $auth . '">Fetch Data From Google&trade; Search Console</a>';
+			case 'aisee_gsc_revoke':
+				return '<a class="button-primary large aisee-btn" id="' . $action . '" data-href="' . $auth . '">Disconnect Google&trade; Search Console</a>';
 		}
 	}
 
