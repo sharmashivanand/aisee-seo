@@ -73,5 +73,8 @@ function aisee_llog( $str ) {
 
 function aisee_flog( $str ) {
 	$file = trailingslashit( dirname( AISEEFILE ) ) . 'log.log';
+	//file_put_contents( $file, PHP_EOL . '===START===' , FILE_APPEND | LOCK_EX );
+	//file_put_contents( $file, PHP_EOL . debug_backtrace()[1]['function'] . PHP_EOL, FILE_APPEND | LOCK_EX );
 	file_put_contents( $file, print_r( $str, 1 ) . PHP_EOL, FILE_APPEND | LOCK_EX );
+	//file_put_contents( $file, '====END====' . PHP_EOL, FILE_APPEND | LOCK_EX );
 }
