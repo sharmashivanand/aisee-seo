@@ -43,9 +43,9 @@ class AISee_GSC {
 	function aisee_tags_support_query( $wp_query ) {
 		if ( is_user_logged_in() && $wp_query->is_main_query() ) {
 			$types = $this->get_supported_post_types();
-			if ( $wp_query->get( 'tag' ) ) {
-				$wp_query->set( 'post_type', $types );
-			}
+			//if ( $wp_query->get( 'term' ) ) {
+			//	$wp_query->set( 'post_type', $types );
+			//}
 		}
 	}
 

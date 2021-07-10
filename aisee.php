@@ -90,6 +90,7 @@ class AISee {
 				'show_in_rest'          => true,
 				'rest_base'             => 'terms',
 				'rest_controller_class' => 'WP_REST_Terms_Controller',
+				'show_tagcloud' => true
 			)
 		);
 		// register_taxonomy_for_object_type( 'aisee_term', 'post' );
