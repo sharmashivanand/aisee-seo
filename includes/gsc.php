@@ -427,7 +427,7 @@ class AISee_GSC {
 
 	function get_supported_post_types() {
 		global $wp_taxonomies;
-		return ( isset( $wp_taxonomies['post_tag'] ) ) ? $wp_taxonomies['post_tag']->object_type : array();
+		return ( isset( $wp_taxonomies['aisee_term'] ) ) ? $wp_taxonomies['aisee_term']->object_type : array();
 	}
 
 	function batch_generate_tax() {
@@ -437,7 +437,7 @@ class AISee_GSC {
 			'posts_per_page' => -1,
 			'tax_query'      => array(
 				array(
-					'taxonomy' => 'post_tag',
+					'taxonomy' => 'aisee_term',
 					'field'    => 'slug',
 					'operator' => 'NOT IN',
 					'terms'    => array( '' ),
@@ -500,14 +500,15 @@ class AISee_GSC {
 						// aisee_flog( "\tPost ID " . $request['postid'] . ' will get Tags: ' . $stats['keys'] );
 						wp_insert_term(
 							$stats['keys'], // the term
-							'post_tag', // the taxonomy
+							'aisee_term', // the taxonomy
 						);
 						// aisee_flog( $stats['keys'] . ' will be added as a tag.' );
 					} else {
 						// aisee_flog( "\tPost ID " . $request['postid'] . ' will NOT GET Tags: ' . $stats['keys'] );
 					}
 				}
-				wp_set_post_tags( $request['postid'], implode( ',', $valid_terms ), false );
+				// wp_set_post_tags( $request['postid'], implode( ',', $valid_terms ), false );
+				wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', false );
 			}
 		}
 		if ( wp_doing_ajax() ) {
