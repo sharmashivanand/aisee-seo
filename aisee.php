@@ -82,7 +82,7 @@ class AISee {
 				'hierarchical'          => false,
 				'query_var'             => 'term',
 				'labels'                => $labels,
-				'rewrite'               => array( 'slug' => 'term' ),
+				'rewrite'               => array( 'slug' => 'term', 'with_front' => true ),
 				'public'                => true,
 				'show_ui'               => true,
 				'show_admin_column'     => true,

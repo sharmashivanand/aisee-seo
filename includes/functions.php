@@ -79,36 +79,8 @@ function aisee_flog( $str ) {
 	// file_put_contents( $file, '====END====' . PHP_EOL, FILE_APPEND | LOCK_EX );
 }
 
-//add_action( 'admin_footer', 'aisee_debug' );
+add_action( 'admin_footer', 'aisee_debug' );
 
-function aisee_debug() {
-	// global $wp_taxonomies;
-	// foreach ( $wp_taxonomies as $tax => $specs ) {
-	// aisee_llog( get_taxonomy_labels( $tax ) );
-	// aisee_llog( get_taxonomy_labels( $specs ) );
-	// }
-	echo '<div class="aisee_tag_cloud">' .
-		wp_tag_cloud(
-			array(
-				'taxonomy' => 'aisee_term',
-				'number'   => 0,
-				'echo' => false
-			)
-		) . '</div>';
-
-	return;
-	the_widget(
-		'WP_Widget_Tag_Cloud',
-		array(
-			'taxonomy' => 'aisee_term',
-			'count'    => false,
-			'title'    => 'asdf',
-		),
-		array(
-			'before_widget' => '',
-			'after_widget'  => '',
-			'before_title'  => '',
-			'after_title'   => '',
-		)
-	);
+function aisee_debug(){
+	
 }

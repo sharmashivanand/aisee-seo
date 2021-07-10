@@ -32,12 +32,43 @@ class AISee_GSC {
 
 		add_action( 'pre_get_posts', array( $this, 'aisee_tags_support_query' ) );
 
+		add_action( 'wp_dashboard_setup', array( $this, 'dashboard_widget' ), 1 );
+
 		$args = array( false );
 		if ( ! wp_next_scheduled( 'aisee_weekly', $args ) ) {
 			wp_schedule_event( time(), 'weekly', 'aisee_weekly', $args );
 		}
 
 		add_action( 'aisee_weekly', array( $this, 'aisee_weekly_batch' ) );
+	}
+
+	function dashboard_widget() {
+		add_meta_box( 'aisee', 'AISee Terms', array( $this, 'aisee_dashboard_widget' ), 'dashboard', 'normal', 'high' );
+	}
+
+	function aisee_dashboard_widget() {
+		$this->aisee_cloud();
+	}
+
+
+	function aisee_cloud() {
+		// global $wp_taxonomies;
+		// foreach ( $wp_taxonomies as $tax => $specs ) {
+		// aisee_llog( get_taxonomy_labels( $tax ) );
+		// aisee_llog( get_taxonomy_labels( $specs ) );
+		// }
+		echo $this->aisee_get_cloud();
+	}
+
+	function aisee_get_cloud() {
+		return '<div class="aisee_tag_cloud">' .
+		wp_tag_cloud(
+			array(
+				'taxonomy' => 'aisee_term',
+				'number'   => 0,
+				'echo'     => false,
+			)
+		) . '</div>';
 	}
 
 	function aisee_tags_support_query( $wp_query ) {
@@ -543,7 +574,7 @@ class AISee_GSC {
 			}
 		}
 		$meta = get_post_meta( $id, '_aisee_keywords', true );
-		
+
 		if ( $meta ) {
 			$t = time();
 			if ( empty( $meta['time'] ) ||
