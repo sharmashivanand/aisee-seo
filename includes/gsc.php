@@ -47,28 +47,8 @@ class AISee_GSC {
 	}
 
 	function aisee_dashboard_widget() {
-		$this->aisee_cloud();
-	}
-
-
-	function aisee_cloud() {
-		// global $wp_taxonomies;
-		// foreach ( $wp_taxonomies as $tax => $specs ) {
-		// aisee_llog( get_taxonomy_labels( $tax ) );
-		// aisee_llog( get_taxonomy_labels( $specs ) );
-		// }
-		echo $this->aisee_get_cloud();
-	}
-
-	function aisee_get_cloud() {
-		return '<div class="aisee_tag_cloud">' .
-		wp_tag_cloud(
-			array(
-				'taxonomy' => 'aisee_term',
-				'number'   => 0,
-				'echo'     => false,
-			)
-		) . '</div>';
+		aisee_global_cloud();
+		aisee_single_cloud( 3985 );
 	}
 
 	function aisee_tags_support_query( $wp_query ) {
@@ -908,17 +888,53 @@ function aisee_gsc() {
 aisee_gsc();
 
 
-function aisee_tax_terms() {
-	$aisee = AISee_GSC::get_instance();
-	$types = $aisee->get_supported_post_types();
-	if ( is_singular( $types ) ) {
-		$args = array(
-			'before' => '',
-			'sep'    => ', ',
-			'after'  => '',
-		);
-		$args = apply_filters( 'aisee_tax_args', $args );
-		// print_r( $args );
-		the_tags( $args['before'], $args['sep'], $args['after'] );
+
+function aisee_global_cloud( $echo = true ) {
+
+	$cloud = wp_tag_cloud(
+		array(
+			'taxonomy' => 'aisee_term',
+			'number'   => 0,
+			'echo'     => false,
+		)
+	);
+	if ( ! is_wp_error( $cloud ) && ! empty( $cloud ) ) {
+		$cloud = '<div class="aisee_global_cloud">' . $cloud . '</div>';
+		if ( $echo ) {
+			echo $cloud;
+		} else {
+			return $cloud;
+		}
+	}
+}
+
+function aisee_single_cloud( $id = false, $echo = true ) {
+	$aic = AISee_GSC::get_instance();
+	if ( $id ) {
+		$terms = wp_get_post_terms( $id, 'aisee_term', array() );
+	} elseif ( is_singular( $aic->get_supported_post_types() ) ) {
+		global $post;
+		$terms = wp_get_post_terms( $post->ID, 'aisee_term', array() );
+	} else {
+		// id not provided and post is not singular / get_supported_post_types
+		return;
+	}
+
+	if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+		foreach ( $terms as $key => $tag ) {
+			$link = get_term_link( (int) $tag->term_id, $tag->taxonomy );
+			if ( is_wp_error( $link ) ) {
+				return;
+			}
+			$terms[ $key ]->link = $link;
+			$terms[ $key ]->id   = $tag->term_id;
+		}
+
+		$output = '<div class="aisee_singular_cloud">' . wp_generate_tag_cloud( $terms, array() ) . '</div>';
+		if ( $echo ) {
+			echo $output;
+		} else {
+			return $output;
+		}
 	}
 }
