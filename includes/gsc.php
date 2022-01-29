@@ -21,8 +21,8 @@ class AISee_GSC {
 		add_action( 'wp_ajax_aisee_update_filter', array( $this, 'aisee_update_filter' ) ); // respond to ajax
 		add_action( 'wp_ajax_nopriv_aisee_update_filter', '__return_false' ); // do not respont to ajax
 
-		add_action( 'wp_ajax_aisee_generate_tags', array( $this, 'aisee_populate_taxonomy' ) ); // respond to ajax
-		add_action( 'wp_ajax_nopriv_aisee_generate_tags', '__return_false' ); // do not respont to ajax
+		add_action( 'wp_ajax_aisee_populate_taxonomy', array( $this, 'aisee_populate_taxonomy' ) ); // respond to ajax
+		add_action( 'wp_ajax_nopriv_aisee_populate_taxonomy', '__return_false' ); // do not respont to ajax
 
 		add_action( 'wp_ajax_aisee_gsc_fetch', array( $this, 'aisee_gsc_fetch' ) ); // respond to ajax
 		add_action( 'wp_ajax_nopriv_aisee_gsc_fetch', '__return_false' ); // do not respont to ajax
@@ -40,6 +40,14 @@ class AISee_GSC {
 		}
 
 		add_action( 'aisee_weekly', array( $this, 'aisee_weekly_batch' ) );
+
+		// add_action('add_meta_boxes_post', array( $this, 'my_meta_box_order' ) );
+
+	}
+
+	function my_meta_box_order(){
+		global $wp_meta_boxes;
+		aisee_flog( $wp_meta_boxes );
 	}
 
 	function dashboard_widget() {
@@ -206,29 +214,15 @@ class AISee_GSC {
 								} // initialize
 							}); // ajax post
 						});
-						/*
-						$( "#aiseeseo_clicks" ).slider({
-							range: true,
-							max: 100,
-							min:0,
-							step: 0.1,
-							values : [33,66],
-							change: aisee_save_filter_values,
-						});
-
-						$( "#aiseeseo_impressions" ).slider({
-							step: 0.1,
-							value: 1,
-							change: aisee_save_filter_values,
-						});
-						*/
 
 						<?php
 						$defaults = aisee_defaults();
 						$defaults = $defaults['gsc_filter'];
+						$gsc_filter = aisee_get_setting( 'gsc_filter' );
+						$gsc_filter = array_replace_recursive( $defaults, $gsc_filter );
 						$defaults = json_encode( $defaults );
 
-						$gsc_filter = aisee_get_setting( 'gsc_filter' );
+						
 						$gsc_filter = json_encode( $gsc_filter );
 
 						?>
@@ -236,6 +230,24 @@ class AISee_GSC {
 						//console.dir(aisee_defaults);
 						gsc_filter = <?php echo $gsc_filter; ?>;
 						console.dir(gsc_filter);
+						$( "#aiseeseo_clicks" ).slider({
+							range: true,
+							min: 0,
+							max: 10000,
+							step: 1,
+							values: [gsc_filter.clicks.min,gsc_filter.clicks.max],
+							change: aisee_save_filter_values,
+							slide: aisee_sync_from_sliders
+						});
+						$( "#aiseeseo_impressions" ).slider({
+							range: true,
+							min: 0,
+							max: 10000,
+							step: 1,
+							values: [gsc_filter.impressions.min,gsc_filter.impressions.max],
+							change: aisee_save_filter_values,
+							slide: aisee_sync_from_sliders
+						});
 						$( "#aiseeseo_ctr" ).slider({
 							range: true,
 							min: 0,
@@ -247,17 +259,26 @@ class AISee_GSC {
 						});
 						$( "#aiseeseo_position" ).slider({
 							range: true,
-							min: 0.1,
+							min: 0,
 							max: 100,
 							step: 1,
 							values: [gsc_filter.position.min,gsc_filter.position.max],
 							change: aisee_save_filter_values,
 							slide: aisee_sync_from_sliders
 						});
+						
+						$('#aiseeseo_clicks_min').html(gsc_filter.clicks.min);
+						$('#aiseeseo_clicks_max').html(gsc_filter.clicks.max);
+
+						$('#aiseeseo_impressions_min').html(gsc_filter.impressions.min);
+						$('#aiseeseo_impressions_max').html(gsc_filter.impressions.max);
+						
 						$('#aiseeseo_ctr_min').html(gsc_filter.ctr.min);
 						$('#aiseeseo_ctr_max').html(gsc_filter.ctr.max);
+
 						$('#aiseeseo_position_min').html(gsc_filter.position.min);
 						$('#aiseeseo_position_max').html(gsc_filter.position.max);
+
 
 						function aisee_sync_from_sliders(occurance, ui){
 
@@ -282,22 +303,46 @@ class AISee_GSC {
 						$('#aiseeseo_gsc_settings_reset').click(function(e){
 							e.preventDefault();
 							//console.dir(aisee_defaults);
+							console.dir(aisee_defaults.clicks.min);
+							console.dir(aisee_defaults.clicks.max);
+							
+							console.dir(aisee_defaults.impressions.min);
+							console.dir(aisee_defaults.impressions.max);
+							
 							console.dir(aisee_defaults.ctr.min);
 							console.dir(aisee_defaults.ctr.max);
+
 							console.dir(aisee_defaults.position.min);
 							console.dir(aisee_defaults.position.max);
 
+
 							// need these first because change eventhandler will fetch from these values when the event fires
+
+							gsc_filter.clicks.min = aisee_defaults.clicks.min;
+							gsc_filter.clicks.max = aisee_defaults.clicks.max;
+							
+							gsc_filter.impressions.min = aisee_defaults.impressions.min;
+							gsc_filter.impressions.max = aisee_defaults.impressions.max;
+
 							gsc_filter.ctr.min = aisee_defaults.ctr.min;
 							gsc_filter.ctr.max = aisee_defaults.ctr.max;
+
 							gsc_filter.position.min = aisee_defaults.position.min;
 							gsc_filter.position.max = aisee_defaults.position.max;
 
+							$( "#aiseeseo_clicks" ).slider( "values", 0, aisee_defaults.clicks.min );
+							$( "#aiseeseo_clicks" ).slider( "values", 1, aisee_defaults.clicks.max );
+							$( "#aiseeseo_impressions" ).slider( "values", 0, aisee_defaults.impressions.min );
+							$( "#aiseeseo_impressions" ).slider( "values", 1, aisee_defaults.impressions.max );
 							$( "#aiseeseo_ctr" ).slider( "values", 0, aisee_defaults.ctr.min );
 							$( "#aiseeseo_ctr" ).slider( "values", 1, aisee_defaults.ctr.max );
 							$( "#aiseeseo_position" ).slider( "values", 0, aisee_defaults.position.min );
 							$( "#aiseeseo_position" ).slider( "values", 1, aisee_defaults.position.max );
 
+							$( "#aiseeseo_clicks_min" ).html( aisee_defaults.clicks.min );
+							$( "#aiseeseo_clicks_max" ).html( aisee_defaults.clicks.max );
+							$( "#aiseeseo_impressions_min" ).html( aisee_defaults.impressions.min );
+							$( "#aiseeseo_impressions_max" ).html( aisee_defaults.impressions.max );
 							$( "#aiseeseo_ctr_min" ).html( aisee_defaults.ctr.min );
 							$( "#aiseeseo_ctr_max" ).html( aisee_defaults.ctr.max );
 							$( "#aiseeseo_position_min" ).html( aisee_defaults.position.min );
@@ -490,6 +535,7 @@ class AISee_GSC {
 		}
 
 		$meta = get_post_meta( $request['postid'], '_aisee_keywords', true );
+		aisee_flog($meta);
 		if (
 			empty( $meta ) ||
 			empty( $meta['keywords'] ) ||
@@ -510,9 +556,13 @@ class AISee_GSC {
 		} else {
 			// aisee_flog( "\taisee_generate_tags processing Post ID " . $request['postid'] . ' MAY get Tags: ' . var_export( $meta, 1 ) );
 			$kw         = $meta['keywords'];
+			uasort( $kw, fn( $a, $b ) => $a[ 'impressions' ] <=> $b[ 'impressions' ] );
+			$kw = array_reverse( $kw );
 			$gsc_filter = aisee_get_setting( 'gsc_filter' );
-			// aisee_flog( $gsc_filter );
+			aisee_flog( $gsc_filter );
 			$valid_terms = array();
+			$count = 0;
+			$limit = apply_filters( 'aisee_term_limit', 10 );
 			foreach ( $kw as $index => $stats ) {
 				$stats['ctr'] = $stats['ctr'] * 100;
 				// aisee_flog( $gsc_filter );
@@ -521,17 +571,27 @@ class AISee_GSC {
 					$stats['ctr'] >= $gsc_filter['ctr']['min'] &&
 					$stats['ctr'] <= $gsc_filter['ctr']['max'] &&
 					$stats['position'] >= $gsc_filter['position']['min'] &&
-					$stats['position'] <= $gsc_filter['position']['max']
+					$stats['position'] <= $gsc_filter['position']['max'] &&
+
+					$stats['clicks'] >= $gsc_filter['clicks']['min'] &&
+					$stats['clicks'] <= $gsc_filter['clicks']['max'] &&
+					$stats['impressions'] >= $gsc_filter['impressions']['min'] &&
+					$stats['impressions'] <= $gsc_filter['impressions']['max']
 				) {
 					$valid_terms[] = $stats['keys'];
-					// aisee_flog( "\tPost ID " . $request['postid'] . ' will get Tags: ' . $stats['keys'] );
-					wp_insert_term(
-						$stats['keys'], // the term
-						'aisee_term', // the taxonomy
-					);
+					aisee_flog( "\tPost ID " . $request['postid'] . ' will get Tags: ' . $stats['keys'] );
+					if( $count < $limit ){
+						wp_insert_term(
+							$stats['keys'], // the term
+							'aisee_term', // the taxonomy
+						);
+					}
+					
+					$count++;
 					// aisee_flog( $stats['keys'] . ' will be added as a tag.' );
 				} else {
-					// aisee_flog( "\tPost ID " . $request['postid'] . ' will NOT GET Tags: ' . $stats['keys'] );
+					aisee_flog( "\tPost ID " . $request['postid'] . ' will NOT GET Tags: ' . $stats['keys'] );
+					aisee_flog( $stats );
 				}
 			}
 			// wp_set_post_tags( $request['postid'], implode( ',', $valid_terms ), false );
@@ -687,6 +747,8 @@ class AISee_GSC {
 			return;
 		}
 		if ( count( $keywords ) ) {
+			uasort( $keywords, fn($a, $b) => $a['impressions'] <=> $b['impressions']);
+			$keywords = array_reverse( $keywords );
 			foreach ( $keywords as $key => $value ) {
 				$html .= '<tr><td>' . $value['keys'] . '</td><td>' . $value['clicks'] . '</td><td>' . round( ( 100 * $value['ctr'] ), 2 ) . '%</td><td>' . $value['impressions'] . '</td><td>' . round( $value['position'], 2 ) . '</td></tr>';
 			}
