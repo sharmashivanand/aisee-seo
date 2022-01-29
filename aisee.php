@@ -84,7 +84,7 @@ class AISee {
 				'labels'                => $labels,
 				'rewrite'               => array( 'slug' => 'term', 'with_front' => true ),
 				'public'                => true,
-				'show_ui'               => true,
+				'show_ui'               => false,
 				'show_admin_column'     => true,
 				'_builtin'              => false,
 				'show_in_rest'          => true,
@@ -108,7 +108,7 @@ class AISee {
 			wp_enqueue_style(
 				'aisee-stylesheet',
 				$this->uri . 'assets/admin-styles.css',
-				array(), // $deps
+				array( 'dashicons' ), // $deps
 				( is_user_logged_in() ? time() : false ),
 				'all' // $media
 			);

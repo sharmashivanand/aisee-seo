@@ -10,6 +10,24 @@
     float: none;
 }
 
+.aisee-action-add,
+.aisee-action-remove {
+    display: inline-block;
+    font-weight: 500;
+    color: white;
+    padding: 0.618em 0.381em;
+    line-height: 1em;
+    cursor: pointer;
+}
+
+.aisee-action-add {
+    background-color: green;
+}
+
+.aisee-action-remove {
+    background-color: red;
+}
+
 #aisee-tag-cloud {
     text-align: center;
     text-transform: uppercase;
