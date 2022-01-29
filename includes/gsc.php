@@ -165,8 +165,7 @@ class AISee_GSC {
 					?>
 					<tr><td><div id="aiseeseo_gsc_settings"><h3 style="font-weight:500">Keyword Filter</h3>
 					<p><strong>Narrow down to keywords that match the following criteria:</strong></p>
-					<!--<p>Clicks between</p> <div id="aiseeseo_clicks" class="aiseeseo_slider"></div> 
-					<p>Impressions between</p> <div id="aiseeseo_impressions" class="aiseeseo_slider"></div>-->
+					
 					<p>Clicks between <span id="aiseeseo_clicks_min"></span> and <span id="aiseeseo_clicks_max"></p> <div id="aiseeseo_clicks" class="aiseeseo_slider"></div>
 
 					<p>Impressions between <span id="aiseeseo_impressions_min"></span> and <span id="aiseeseo_impressions_max"></p> <div id="aiseeseo_impressions" class="aiseeseo_slider"></div>
