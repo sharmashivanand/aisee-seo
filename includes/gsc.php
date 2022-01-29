@@ -21,7 +21,7 @@ class AISee_GSC {
 		add_action( 'wp_ajax_aisee_update_filter', array( $this, 'aisee_update_filter' ) ); // respond to ajax
 		add_action( 'wp_ajax_nopriv_aisee_update_filter', '__return_false' ); // do not respont to ajax
 
-		add_action( 'wp_ajax_aisee_generate_tags', array( $this, 'aisee_generate_tags' ) ); // respond to ajax
+		add_action( 'wp_ajax_aisee_generate_tags', array( $this, 'aisee_populate_taxonomy' ) ); // respond to ajax
 		add_action( 'wp_ajax_nopriv_aisee_generate_tags', '__return_false' ); // do not respont to ajax
 
 		add_action( 'wp_ajax_aisee_gsc_fetch', array( $this, 'aisee_gsc_fetch' ) ); // respond to ajax
@@ -159,29 +159,33 @@ class AISee_GSC {
 					<p><strong>Narrow down to keywords that match the following criteria:</strong></p>
 					<!--<p>Clicks between</p> <div id="aiseeseo_clicks" class="aiseeseo_slider"></div> 
 					<p>Impressions between</p> <div id="aiseeseo_impressions" class="aiseeseo_slider"></div>-->
+					<p>Clicks between <span id="aiseeseo_clicks_min"></span> and <span id="aiseeseo_clicks_max"></p> <div id="aiseeseo_clicks" class="aiseeseo_slider"></div>
+
+					<p>Impressions between <span id="aiseeseo_impressions_min"></span> and <span id="aiseeseo_impressions_max"></p> <div id="aiseeseo_impressions" class="aiseeseo_slider"></div>
+					
 					<p>CTR between <span id="aiseeseo_ctr_min"></span> and <span id="aiseeseo_ctr_max"></span></p> <div id="aiseeseo_ctr" class="aiseeseo_slider"></div>
 					
 					<p>Average position between <span id="aiseeseo_position_min"></span> and <span id="aiseeseo_position_max"></p> <div id="aiseeseo_position" class="aiseeseo_slider"></div>
 					
 					<div id="aiseeseo_ajax_status"></div>
-					<p><?php submit_button( 'Populate Taxonomy &rarr;', 'primary', 'aisee_generate_tags', false ); ?></p>
+					<p><?php submit_button( 'Populate Taxonomy &rarr;', 'primary', 'aisee_populate_taxonomy', false ); ?></p>
 					</div></td>
 					<td>
 					<input type="button" value="Reset Filter to Defaults" id="aiseeseo_gsc_settings_reset" />
 					<script type="text/javascript">
 					jQuery(document).ready(function ($) { //wrapper
 					
-						$('#aisee_generate_tags').click(function(e){
-							aisee_generate_tags = {
-								aisee_generate_tags_nonce: '<?php echo wp_create_nonce( 'aisee_generate_tags' ); ?>',
-								action: "aisee_generate_tags",
+						$('#aisee_populate_taxonomy').click(function(e){
+							aisee_populate_taxonomy = {
+								aisee_generate_tags_nonce: '<?php echo wp_create_nonce( 'aisee_populate_taxonomy' ); ?>',
+								action: "aisee_populate_taxonomy",
 								postid: '<?php echo $post->ID; ?>',
 							};
 							
 							$.ajax({
 								url: ajaxurl,
 								method: 'POST',
-								data: aisee_generate_tags,
+								data: aisee_populate_taxonomy,
 								complete: function(jqXHR, textStatus){
 									// console.dir(jqXHR);
 									// console.dir(typeof jqXHR.responseJSON.success);
@@ -470,18 +474,18 @@ class AISee_GSC {
 		foreach ( $posts as $post ) {
 			set_time_limit( $timeout );
 			// aisee_flog( 'Generating Tags for: ' . $post->ID . "\t" . $post->post_title );
-			$this->aisee_generate_tags( array( 'postid' => $post->ID ) );
+			$this->aisee_populate_taxonomy( array( 'postid' => $post->ID ) );
 			// aisee_flog( $post->post_title );
 		}
 		// wp_send_json_success( $query );
 	}
 
-	function aisee_generate_tags( $request = array() ) {
+	function aisee_populate_taxonomy( $request = array() ) {
 		// wp_send_json_success( $this->batch_generate_tax() );
 		// print_r( get_post_types( array( 'public' => true ) ) ); return;
 		// wp_send_json_success( get_taxonomies() );
 		if ( wp_doing_ajax() ) {
-			check_ajax_referer( 'aisee_generate_tags', 'aisee_generate_tags_nonce' );
+			check_ajax_referer( 'aisee_populate_taxonomy', 'aisee_generate_tags_nonce' );
 			$request = $_REQUEST;
 		}
 
@@ -575,7 +579,7 @@ class AISee_GSC {
 		} else {
 			aisee_flog( 'meta for post id ' . $id . ' does not exist. Fetching fresh' );
 		}
-		if ( ! $meta ) {
+		if ( 1 || ! $meta ) {
 			$args     = array(
 				'httpversion' => '1.1',
 				'compress'    => true,
@@ -587,8 +591,8 @@ class AISee_GSC {
 				$url,
 				$args
 			);
-			// aisee_flog($url);
-			// aisee_flog($args);
+			aisee_flog( $url );
+			aisee_flog( $args );
 			if ( is_wp_error( $response ) ) {
 				if ( wp_doing_ajax() ) {
 					wp_send_json_error( $response->get_error_message() );
@@ -778,7 +782,9 @@ class AISee_GSC {
 		$statevars = aisee_encode( array_merge( $account, $statevars ) );
 		$auth      = add_query_arg( $action, $statevars, AISEEAPIEPSL );
 		$auth      = add_query_arg( 'aisee_action', $action, $auth );
+		// aisee_flog( $auth );
 		return $auth;
+
 		switch ( $action ) {
 			case 'aisee_gsc_authenticate':
 				return '<a class="button-primary large aisee-btn" id="' . $action . '" href="' . $auth . '">Connect with Google&trade; Search Console</a>';

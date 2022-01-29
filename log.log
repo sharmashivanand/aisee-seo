@@ -1,0 +1,473 @@
+Array
+(
+    [ID] => 25
+    [user_email] => shivanand@malcure.com
+    [first_name] => Rachael
+    [last_name] => Kurt
+    [user_login] => shivanand@malcure.com
+    [gsc] => 1
+    [gsc_filter] => Array
+        (
+            [ctr] => Array
+                (
+                    [min] => 0
+                    [max] => 100
+                )
+
+            [position] => Array
+                (
+                    [min] => 1
+                    [max] => 100
+                )
+
+        )
+
+    [gsc_time_updated] => 1643430149
+)
+
+https://aiseeseo.com/?p=9&aisee_gsc_fetch=eyJJRCI6MjUsInVzZXJfZW1haWwiOiJzaGl2YW5hbmRAbWFsY3VyZS5jb20iLCJmaXJzdF9uYW1lIjoiUmFjaGFlbCIsImxhc3RfbmFtZSI6Ikt1cnQiLCJ1c2VyX2xvZ2luIjoic2hpdmFuYW5kQG1hbGN1cmUuY29tIiwiZ3NjIjp0cnVlLCJnc2NfZmlsdGVyIjp7ImN0ciI6eyJtaW4iOiIwIiwibWF4IjoiMTAwIn0sInBvc2l0aW9uIjp7Im1pbiI6IjEiLCJtYXgiOiIxMDAifX0sImdzY190aW1lX3VwZGF0ZWQiOjE2NDM0MzAxNDksInNpdGVfdXJsIjoiaHR0cHM6XC9cL21hbGN1cmUuY29tXC8iLCJyZXR1cm5fdXJsIjoiaHR0cHM6XC9cL21hbGN1cmUuY29tXC93cC1hZG1pblwvcG9zdC5waHA_cG9zdD0xJmFtcDthY3Rpb249ZWRpdCIsInBlcm1hbGluayI6Imh0dHBzOlwvXC9tYWxjdXJlLmNvbVwvYmxvZ1wvc2VjdXJpdHlcLzEwLXN0ZXBzLXRvLXJlbW92ZS1tYWx3YXJlLWZyb20teW91ci13b3JkcHJlc3Mtc2l0ZVwvIiwib3JpZ2luX25vbmNlIjoiNDQ0ZWNjZjgyMCIsIm9yaWdpbl9hamF4dXJsIjoiaHR0cHM6XC9cL21hbGN1cmUuY29tXC93cC1hZG1pblwvYWRtaW4tYWpheC5waHAifQ%2C%2C&aisee_action=aisee_gsc_fetch&cb=1643430976
+Array
+(
+    [httpversion] => 1.1
+    [compress] => 1
+    [headers] => Array
+        (
+            [aisee-gsc-fetch] => 1
+        )
+
+)
+
+Updating Meta With:
+Array
+(
+    [time] => 1643430977
+    [keywords] => Array
+        (
+            [0] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 3
+                    [keys] => check wordpress files for malware
+                    [position] => 91.333333333333
+                )
+
+            [1] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 3
+                    [keys] => clean hacked wordpress
+                    [position] => 96.333333333333
+                )
+
+            [2] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 38
+                    [keys] => clean hacked wordpress site
+                    [position] => 95.684210526316
+                )
+
+            [3] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 15
+                    [keys] => clean up hacked wordpress site
+                    [position] => 92.466666666667
+                )
+
+            [4] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 7
+                    [keys] => how clean hacked wordpress site
+                    [position] => 93
+                )
+
+            [5] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => how to clean a hacked wordpress website
+                    [position] => 100
+                )
+
+            [6] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 4
+                    [keys] => how to clean hacked wordpress site
+                    [position] => 88.5
+                )
+
+            [7] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 11
+                    [keys] => how to clean wordpress hacked
+                    [position] => 93.818181818182
+                )
+
+            [8] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => how to clean wordpress site of malware
+                    [position] => 45
+                )
+
+            [9] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => how to protect wordpress from malware
+                    [position] => 99
+                )
+
+            [10] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 41
+                    [keys] => how to protect wordpress site from malware
+                    [position] => 81.414634146341
+                )
+
+            [11] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 5
+                    [keys] => how to remove injected code from wordpress
+                    [position] => 73
+                )
+
+            [12] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => how to remove just another wordpress site from google search
+                    [position] => 75
+                )
+
+            [13] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 14
+                    [keys] => how to remove malicious code from wordpress
+                    [position] => 73.357142857143
+                )
+
+            [14] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => how to remove malicious links from wordpress website
+                    [position] => 81
+                )
+
+            [15] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 5
+                    [keys] => how to remove malware from a website
+                    [position] => 88
+                )
+
+            [16] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 4
+                    [keys] => how to remove malware from cpanel
+                    [position] => 83
+                )
+
+            [17] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 24
+                    [keys] => how to remove malware from wordpress site
+                    [position] => 48.375
+                )
+
+            [18] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 25
+                    [keys] => how to remove malware from wordpress website
+                    [position] => 48.92
+                )
+
+            [19] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 2
+                    [keys] => how to remove malware from your website
+                    [position] => 86
+                )
+
+            [20] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 56
+                    [keys] => how to remove this site may be hacked
+                    [position] => 93.035714285714
+                )
+
+            [21] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => how to remove virus from wordpress website
+                    [position] => 59
+                )
+
+            [22] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 3
+                    [keys] => how to scan mysql database for malware
+                    [position] => 90.666666666667
+                )
+
+            [23] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => how to scan wordpress database for malware
+                    [position] => 75
+                )
+
+            [24] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 16
+                    [keys] => iyfsearch removal
+                    [position] => 56.6875
+                )
+
+            [25] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => malware on my wordpress site
+                    [position] => 72
+                )
+
+            [26] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => malware removal steps
+                    [position] => 93
+                )
+
+            [27] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 2
+                    [keys] => malware search console
+                    [position] => 75
+                )
+
+            [28] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 2
+                    [keys] => malware wordpress
+                    [position] => 92
+                )
+
+            [29] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 3
+                    [keys] => preventing wordpress malware
+                    [position] => 83
+                )
+
+            [30] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 3
+                    [keys] => remove malware from website wordpress
+                    [position] => 58
+                )
+
+            [31] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => remove malware from wordpress database
+                    [position] => 67
+                )
+
+            [32] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 12
+                    [keys] => remove malware from wordpress site
+                    [position] => 44.5
+                )
+
+            [33] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 4
+                    [keys] => remove malware from wordpress website
+                    [position] => 58
+                )
+
+            [34] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => remove malware wordpress plugin
+                    [position] => 92
+                )
+
+            [35] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 3
+                    [keys] => scan mysql database for malware
+                    [position] => 85
+                )
+
+            [36] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => scan wordpress database for malware
+                    [position] => 85
+                )
+
+            [37] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 2
+                    [keys] => scan wordpress files for malware
+                    [position] => 92
+                )
+
+            [38] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 9
+                    [keys] => site:www.converticacommerce.com
+                    [position] => 22.777777777778
+                )
+
+            [39] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 10
+                    [keys] => steps to remove malware
+                    [position] => 64.1
+                )
+
+            [40] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 4
+                    [keys] => this site may be hacked wordpress
+                    [position] => 87.5
+                )
+
+            [41] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 170
+                    [keys] => this site may be hacked wordpress how to remove
+                    [position] => 65.894117647059
+                )
+
+            [42] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 2
+                    [keys] => what are the steps you can take if your wordpress file is hacked?
+                    [position] => 100
+                )
+
+            [43] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 16
+                    [keys] => wordpress malware cleaner
+                    [position] => 74.4375
+                )
+
+            [44] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 2
+                    [keys] => wordpress malware removal tool
+                    [position] => 79.5
+                )
+
+            [45] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 4
+                    [keys] => wordpress site hacked how to clean
+                    [position] => 86
+                )
+
+            [46] => Array
+                (
+                    [clicks] => 0
+                    [ctr] => 0
+                    [impressions] => 1
+                    [keys] => wordpress site infected with malware
+                    [position] => 101
+                )
+
+        )
+
+)
+
+update_post_meta resulted in 1

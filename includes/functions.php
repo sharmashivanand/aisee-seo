@@ -29,6 +29,14 @@ function aisee_defaults() {
 				'min' => 1,
 				'max' => 100,
 			),
+			'impressions' => array(
+				'min' => 180,
+				'max' => 1000,
+			),
+			'clicks' => array(
+				'min' => 18,
+				'max' => 100,
+			),
 		),
 	);
 	return $defaults;
