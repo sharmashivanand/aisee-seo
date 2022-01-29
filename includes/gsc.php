@@ -717,7 +717,7 @@ class AISee_GSC {
 
 		if ( $meta ) {
 			$t = time();
-			aisee_flog( 'we have meta _aisee_keywords' );
+			aisee_flog( 'we have meta but not sure if the meta has keywords' );
 			if ( empty( $meta['time'] ) ||
 				( $t - $meta['time'] ) >= ( 86400 * 7 ) || // If the difference is greater than 7 days then fetch fresh
 				( aisee_get_setting( 'gsc_time_updated' ) > $meta['time'] )  // If filter settings were updated after fetching the keywords of this post
@@ -845,16 +845,18 @@ class AISee_GSC {
 			foreach ( $keywords as $key => $value ) {
 				$action       = 'add';
 				$action_label = '✓';
-				aisee_flog( '$key' );
-				aisee_flog( $value['keys'] );
-				aisee_flog( '/ $key' );
-				if ( isset( $aisee_tags[ $value['keys'] ] ) ) {
-					aisee_flog( 'isset $aisee_tags[ $key ]' );
-					aisee_flog( 'isset ' . $aisee_tags[ $key ] );
-					aisee_flog( '/ isset $aisee_tags[ $key ]' );
+				
+				$kw = $value['keys'];
+				aisee_flog( '$kw:' . $kw );
+				
+				if ( in_array( $kw, $aisee_tags ) ) {
+					
+					// aisee_flog( 'exists ' . $aisee_tags[ $kw ] );
+					
 					$action       = 'remove';
 					$action_label = '✕';
-					unset( $aisee_tags[ $key ] );
+					//unset( $aisee_tags[ $kw ] );
+					unset( $aisee_tags[ array_search( $kw ,$aisee_tags ) ] );
 				}
 				$html .= '<tr><td>' . $value['keys'] . '</td><td>' . $value['clicks'] . '</td><td>' . round( ( 100 * $value['ctr'] ), 2 ) . '%</td><td>' . $value['impressions'] . '</td><td>' . round( $value['position'], 2 ) . '</td><td><span class="aisee-action aisee-action-' . $action . '">' . $action_label . '</span></td></tr>';
 			}
