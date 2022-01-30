@@ -222,7 +222,7 @@ class AISee_GSC {
 					<script type="text/javascript">
 					jQuery(document).ready(function ($) { //wrapper
 					
-						$('#aisee_gsc_keywords_tbl').on('click', '.aisee-action', function(e){
+						$('#aisee_gsc_keywords').on('click', '.aisee-action', function(e){
 							console.dir($(this).attr('class'));
 							console.dir($(this).closest('tr').children('td:first').text());
 							word = $(this).closest('tr').children('td:first').text();
@@ -837,8 +837,8 @@ class AISee_GSC {
 			$aisee_tags[] = $term->name;
 		}
 
-		aisee_flog( '$aisee_tags' );
-		aisee_flog( $aisee_tags );
+		// aisee_flog( '$aisee_tags' );
+		// aisee_flog( $aisee_tags );
 		if ( count( $keywords ) ) {
 			uasort( $keywords, fn( $a, $b) => $a['impressions'] <=> $b['impressions'] );
 			$keywords = array_reverse( $keywords );
@@ -847,16 +847,13 @@ class AISee_GSC {
 				$action_label = '✓';
 				
 				$kw = $value['keys'];
-				aisee_flog( '$kw:' . $kw );
 				
 				if ( in_array( $kw, $aisee_tags ) ) {
-					
-					// aisee_flog( 'exists ' . $aisee_tags[ $kw ] );
 					
 					$action       = 'remove';
 					$action_label = '✕';
 					//unset( $aisee_tags[ $kw ] );
-					unset( $aisee_tags[ array_search( $kw ,$aisee_tags ) ] );
+					unset( $aisee_tags[ array_search( $kw, $aisee_tags ) ] );
 				}
 				$html .= '<tr><td>' . $value['keys'] . '</td><td>' . $value['clicks'] . '</td><td>' . round( ( 100 * $value['ctr'] ), 2 ) . '%</td><td>' . $value['impressions'] . '</td><td>' . round( $value['position'], 2 ) . '</td><td><span class="aisee-action aisee-action-' . $action . '">' . $action_label . '</span></td></tr>';
 			}
