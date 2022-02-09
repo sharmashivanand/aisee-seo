@@ -285,7 +285,7 @@ class AISee_GSC {
 											}
 										}
 										else {
-											$(this).css('border','5px solid purple');
+											// $(this).css('border','5px solid purple');
 										}
 									}
 									else { // no response json
