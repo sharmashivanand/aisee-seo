@@ -16,16 +16,24 @@
     font-weight: 500;
     color: white;
     padding: 0.618em 0.381em;
-    line-height: 1em;
+    line-height: 0em;
     cursor: pointer;
+    font-family: monospace;
 }
 
 .aisee-action-add {
-    background-color: green;
+    background-color: #00800080;
+}
+
+.aisee-action-add:hover {
+    background-color: #008000;
 }
 
 .aisee-action-remove {
-    background-color: red;
+    background-color: #008000;
+}
+.aisee-action-remove:hover {
+    background-color: #00800080;
 }
 
 #aisee-tag-cloud {

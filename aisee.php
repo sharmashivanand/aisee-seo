@@ -84,7 +84,7 @@ class AISee {
 				'labels'                => $labels,
 				'rewrite'               => array( 'slug' => 'term', 'with_front' => true ),
 				'public'                => true,
-				'show_ui'               => false,
+				'show_ui'               => true,
 				'show_admin_column'     => true,
 				'_builtin'              => false,
 				'show_in_rest'          => true,
@@ -112,6 +112,7 @@ class AISee {
 				( is_user_logged_in() ? time() : false ),
 				'all' // $media
 			);
+			wp_enqueue_script( 'jquery-ui-sortable' );
 		}
 	}
 

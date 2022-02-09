@@ -222,6 +222,28 @@ class AISee_GSC {
 					<script type="text/javascript">
 					jQuery(document).ready(function ($) { //wrapper
 					
+						try{
+							$('#aisee_gsc_keywords_tbl tbody').sortable();
+							if(1){
+
+							var table = $('#aisee_gsc_keywords_tbl');
+
+							$('th.sortable').click(function(){
+								var table = $(this).parents('table').eq(0);
+								var ths = table.find('tr:gt(0)').toArray().sort(compare($(this).index()));
+								this.asc = !this.asc;
+								if (!this.asc)
+								ths = ths.reverse();
+								for (var i = 0; i < ths.length; i++)
+								table.append(ths[i]);
+							});
+							console.log('sorted!');
+							}
+						}
+						catch(e) {
+							console.dir(e);
+						}
+
 						$('#aisee_gsc_keywords').on('click', '.aisee-action', function(e){
 							console.dir($(this).attr('class'));
 							console.dir($(this).closest('tr').children('td:first').text());
@@ -231,7 +253,7 @@ class AISee_GSC {
 							}
 							if($(this).hasClass('aisee-action-remove')) {
 								action_type = 'remove';
-								action_label = '✕';
+								action_label = '-';
 							}
 							aisee_tag_action = {
 								aisee_tag_action_nonce: '<?php echo wp_create_nonce( 'aisee_tag_action' ); ?>',
@@ -253,11 +275,13 @@ class AISee_GSC {
 											$(this).removeClass($(this).attr('class'));
 											if(action_type == 'remove') {
 												$(this).addClass('aisee-action aisee-action-add');
-												$(this).html('✓');
+												$(this).attr('title', 'Add Keyword');
+												$(this).html('+');
 											}
 											if(action_type == 'add') {
 												$(this).addClass('aisee-action aisee-action-remove');
-												$(this).html('✕');
+												$(this).attr('title', 'Remove Keyword');
+												$(this).html('-');
 											}
 										}
 										else {
@@ -502,27 +526,6 @@ class AISee_GSC {
 
 						function tableCell(tr, index){ 
 							return $(tr).children('td').eq(index).text() 
-						}
-						try{
-							// $('#aisee_gsc_keywords_tbl tbody').sortable();
-							if(0){
-
-							var table = $('#aisee_gsc_keywords_tbl');
-
-							$('th.sortable').click(function(){
-								var table = $(this).parents('table').eq(0);
-								var ths = table.find('tr:gt(0)').toArray().sort(compare($(this).index()));
-								this.asc = !this.asc;
-								if (!this.asc)
-								ths = ths.reverse();
-								for (var i = 0; i < ths.length; i++)
-								table.append(ths[i]);
-							});
-							console.log('sorted!');
-							}
-						}
-						catch(e) {
-							console.dir(e);
 						}
 					
 						$("#aisee_gsc_fetch").click(function (e) {
@@ -844,18 +847,18 @@ class AISee_GSC {
 			$keywords = array_reverse( $keywords );
 			foreach ( $keywords as $key => $value ) {
 				$action       = 'add';
-				$action_label = '✓';
+				$action_label = '+';
 				
 				$kw = $value['keys'];
 				
 				if ( in_array( $kw, $aisee_tags ) ) {
 					
 					$action       = 'remove';
-					$action_label = '✕';
+					$action_label = '-';
 					//unset( $aisee_tags[ $kw ] );
 					unset( $aisee_tags[ array_search( $kw, $aisee_tags ) ] );
 				}
-				$html .= '<tr><td>' . $value['keys'] . '</td><td>' . $value['clicks'] . '</td><td>' . round( ( 100 * $value['ctr'] ), 2 ) . '%</td><td>' . $value['impressions'] . '</td><td>' . round( $value['position'], 2 ) . '</td><td><span class="aisee-action aisee-action-' . $action . '">' . $action_label . '</span></td></tr>';
+				$html .= '<tr><td>' . $value['keys'] . '</td><td>' . $value['clicks'] . '</td><td>' . round( ( 100 * $value['ctr'] ), 2 ) . '%</td><td>' . $value['impressions'] . '</td><td>' . round( $value['position'], 2 ) . '</td><td><span title="'.ucwords( $action ).' Keyword" class="aisee-action aisee-action-' . $action . '">' . $action_label . '</span></td></tr>';
 			}
 
 			// $html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th class="sortable">Keyword Phrase</th><th class="sortable">Clicks</th><th class="sortable">CTR</th><th class="sortable">Impressions</th><th class="sortable">Position</th><th></th></tr></thead>' . $html . '</table>';
@@ -864,12 +867,12 @@ class AISee_GSC {
 		}
 		$tags_html = '';
 		foreach ( $aisee_tags as $aisee_tag ) {
-			$tags_html .= '<tr><td>' . $aisee_tag . '</td><td> &mdash; </td><td> &mdash; </td><td> &mdash; </td><td> &mdash; </td><td><span class="aisee-action aisee-action-remove">✕</span></td></tr>';
+			$tags_html .= '<tr><td>' . $aisee_tag . '</td><td> &mdash; </td><td> &mdash; </td><td> &mdash; </td><td> &mdash; </td><td><span title="Remove Keyword" class="aisee-action aisee-action-remove">-</span></td></tr>';
 		}
 
 		$html = $html . $tags_html;
 		if ( $html ) {
-			$html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th class="sortable">Keyword Phrase</th><th class="sortable">Clicks</th><th class="sortable">CTR</th><th class="sortable">Impressions</th><th class="sortable">Position</th><th></th></tr></thead>' . $html . '</table>';
+			$html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th class="sortable">Keyword Phrase</th><th class="sortable">Clicks</th><th class="sortable">CTR</th><th class="sortable">Impressions</th><th class="sortable">Position</th><th>Add / Remove</th></tr></thead>' . $html . '</table>';
 		} else {
 			$html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th class="sortable">Keyword Phrase</th><th class="sortable">Clicks</th><th class="sortable">CTR</th><th class="sortable">Impressions</th><th class="sortable">Position</th></tr></thead><tr><td colspan="4">No keywords found</td></tr></table>';
 		}
@@ -886,6 +889,7 @@ class AISee_GSC {
 				'span'  => array(
 					'id'    => array(),
 					'class' => array(),
+					'title' => array(),
 				),
 				'p'     => array(
 					'id'    => array(),
