@@ -236,8 +236,8 @@ class AISee_GSC {
 								ths = ths.reverse();
 								for (var i = 0; i < ths.length; i++)
 								table.append(ths[i]);
+								console.log('sorted!');
 							});
-							console.log('sorted!');
 							}
 						}
 						catch(e) {
@@ -519,6 +519,10 @@ class AISee_GSC {
 						function compare(idx) {
 							return function(a, b) {
 							var A = tableCell(a, idx), B = tableCell(b, idx)
+							if( A.match(/\d+%/) && B.match(/\d+%/) ) { // Help sort by CTR percentage.
+								A = A.replace('%','');
+								B = B.replace('%','');
+							}
 							return $.isNumeric(A) && $.isNumeric(B) ? 
 								A - B : A.toString().localeCompare(B)
 							}
@@ -872,7 +876,7 @@ class AISee_GSC {
 
 		$html = $html . $tags_html;
 		if ( $html ) {
-			$html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th class="sortable">Keyword Phrase</th><th class="sortable">Clicks</th><th class="sortable">CTR</th><th class="sortable">Impressions</th><th class="sortable">Position</th><th>Add / Remove</th></tr></thead>' . $html . '</table>';
+			$html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th class="sortable">Keyword Phrase</th><th class="sortable">Clicks</th><th class="sortable">CTR</th><th class="sortable">Impressions</th><th class="sortable">Position</th><th class="sortable">Add / Remove</th></tr></thead>' . $html . '</table>';
 		} else {
 			$html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th class="sortable">Keyword Phrase</th><th class="sortable">Clicks</th><th class="sortable">CTR</th><th class="sortable">Impressions</th><th class="sortable">Position</th></tr></thead><tr><td colspan="4">No keywords found</td></tr></table>';
 		}
