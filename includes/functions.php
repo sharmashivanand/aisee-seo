@@ -21,11 +21,11 @@ function aisee_defaults() {
 	$defaults = array(
 		'connection' => array(),
 		'gsc_filter' => array(
-			'ctr'      => array(
+			'ctr'         => array(
 				'min' => 0,
 				'max' => 100,
 			),
-			'position' => array(
+			'position'    => array(
 				'min' => 1,
 				'max' => 100,
 			),
@@ -33,7 +33,7 @@ function aisee_defaults() {
 				'min' => 180,
 				'max' => 1000,
 			),
-			'clicks' => array(
+			'clicks'      => array(
 				'min' => 0,
 				'max' => 10000,
 			),
@@ -89,6 +89,6 @@ function aisee_flog( $str ) {
 
 add_action( 'admin_footer', 'aisee_debug' );
 
-function aisee_debug(){
-	
+function aisee_debug() {
+
 }

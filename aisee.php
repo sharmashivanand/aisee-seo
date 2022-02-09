@@ -82,7 +82,10 @@ class AISee {
 				'hierarchical'          => false,
 				'query_var'             => 'term',
 				'labels'                => $labels,
-				'rewrite'               => array( 'slug' => 'term', 'with_front' => true ),
+				'rewrite'               => array(
+					'slug'       => 'term',
+					'with_front' => true,
+				),
 				'public'                => true,
 				'show_ui'               => true,
 				'show_admin_column'     => true,
@@ -90,7 +93,7 @@ class AISee {
 				'show_in_rest'          => true,
 				'rest_base'             => 'terms',
 				'rest_controller_class' => 'WP_REST_Terms_Controller',
-				'show_tagcloud' => true
+				'show_tagcloud'         => true,
 			)
 		);
 		// register_taxonomy_for_object_type( 'aisee_term', 'post' );
