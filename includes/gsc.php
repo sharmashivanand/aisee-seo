@@ -1114,7 +1114,12 @@ function aisee_single_cloud( $id = false, $echo = true ) {
 			$terms[ $key ]->id   = $tag->term_id;
 		}
 
-		$output = '<div class="aisee_singular_cloud">' . wp_generate_tag_cloud( $terms, array() ) . '</div>';
+		if( is_singular( $aic->get_supported_post_types() ) ){
+			$output = '<div class="aisee_singular_cloud">' . wp_generate_tag_cloud( $terms, array( 'smallest' => '0.8125', 'largest' => '0.8125', 'unit' => 'em' ) ) . '</div>';
+		}
+		else {
+			$output = '<div class="aisee_singular_cloud">' . wp_generate_tag_cloud( $terms, array() ) . '</div>';
+		}
 		if ( $echo ) {
 			echo $output;
 		} else {
