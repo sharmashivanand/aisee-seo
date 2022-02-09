@@ -696,7 +696,7 @@ class AISee_GSC {
 				}
 			}
 			// wp_set_post_tags( $request['postid'], implode( ',', $valid_terms ), false );
-			wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', false );
+			wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', ! wp_doing_ajax() );
 		}
 
 		if ( wp_doing_ajax() ) {

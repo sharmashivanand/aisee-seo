@@ -87,12 +87,15 @@
     padding: .618em 1em;
 }
 
+#aisee_gsc_keywords tr:hover td {
+    background: #fc0;
+}
 #aisee_gsc_keywords tr:nth-child(even) {
-    background: #f7f7f7;
+    _background: #f7f7f7;
 }
 
 #aisee_gsc_keywords tr:nth-child(odd) {
-    background: #fff;
+    _background: #fff;
 }
 
 #aisee_gsc_keywords td {

@@ -22,7 +22,7 @@ function aisee_defaults() {
 		'connection' => array(),
 		'gsc_filter' => array(
 			'ctr'      => array(
-				'min' => 1,
+				'min' => 0,
 				'max' => 100,
 			),
 			'position' => array(
@@ -34,8 +34,8 @@ function aisee_defaults() {
 				'max' => 1000,
 			),
 			'clicks' => array(
-				'min' => 18,
-				'max' => 100,
+				'min' => 0,
+				'max' => 10000,
 			),
 		),
 	);
