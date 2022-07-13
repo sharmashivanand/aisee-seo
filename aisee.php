@@ -39,6 +39,7 @@ class AISee {
 		require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'gsc.php';
 		require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'tagcloud.php';
 		require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'tagcomplete.php';
+		require_once $this->dir . 'includes' . DIRECTORY_SEPARATOR . 'cli.php';
 	}
 
 	function hooks() {

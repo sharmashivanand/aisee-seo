@@ -92,7 +92,7 @@ class AISee_GSC {
 
 	function aisee_dashboard_widget() {
 		aisee_global_cloud();
-		aisee_single_cloud( 3985 );
+		// aisee_single_cloud();
 	}
 
 	function aisee_tags_support_query( $wp_query ) {
@@ -595,18 +595,18 @@ class AISee_GSC {
 	}
 
 	function batch_generate_tax() {
-		$args    = array(
+		$args = array(
 			'post_type'      => $this->get_supported_post_types(),
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
-			'tax_query'      => array(
-				array(
-					'taxonomy' => 'aisee_term',
-					'field'    => 'slug',
-					'operator' => 'NOT IN',
-					'terms'    => array( '' ),
-				),
-			),
+			// 'tax_query'      => array( // only add post meta to those that do not have keywords
+			// array(
+			// 'taxonomy' => 'aisee_term',
+			// 'field'    => 'slug',
+			// 'operator' => 'NOT IN',
+			// 'terms'    => array( '' ),
+			// ),
+			// ),
 		);
 		$query   = new WP_Query( $args );
 		$posts   = $query->get_posts();
@@ -619,13 +619,20 @@ class AISee_GSC {
 		// aisee_flog( $posts );
 		foreach ( $posts as $post ) {
 			set_time_limit( $timeout );
-			// aisee_flog( 'Generating Tags for: ' . $post->ID . "\t" . $post->post_title );
+			aisee_flog( 'Generating Tags for: ' . $post->ID . "\t" . $post->post_title );
 			$this->aisee_populate_taxonomy( array( 'postid' => $post->ID ) );
 			// aisee_flog( $post->post_title );
 		}
 		// wp_send_json_success( $query );
 	}
 
+	/**
+	 * Filter and adds terms to post
+	 * Can be called via cron or via wp-ajax on individual post by clicking Populate Taxonomy
+	 *
+	 * @param array $request
+	 * @return void
+	 */
 	function aisee_populate_taxonomy( $request = array() ) {
 		// wp_send_json_success( $this->batch_generate_tax() );
 		// print_r( get_post_types( array( 'public' => true ) ) ); return;
@@ -636,8 +643,8 @@ class AISee_GSC {
 		}
 
 		$meta = get_post_meta( $request['postid'], '_aisee_keywords', true );
-		// aisee_flog( $meta );
-		if (
+
+		if ( // attempt to fetch fresh and add them to the post_meta
 			empty( $meta ) ||
 			empty( $meta['keywords'] ) ||
 			! is_array( $meta['keywords'] )
@@ -696,7 +703,8 @@ class AISee_GSC {
 				}
 			}
 			// wp_set_post_tags( $request['postid'], implode( ',', $valid_terms ), false );
-			wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', ! wp_doing_ajax() );
+			wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', false );
+			// wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', ! wp_doing_ajax() );
 		}
 
 		if ( wp_doing_ajax() ) {
@@ -724,20 +732,15 @@ class AISee_GSC {
 
 		if ( $meta ) {
 			$t = time();
-			// aisee_flog( 'we have meta but not sure if the meta has keywords' );
 			if ( empty( $meta['time'] ) ||
 				( $t - $meta['time'] ) >= ( 86400 * 7 ) || // If the difference is greater than 7 days then fetch fresh
 				( aisee_get_setting( 'gsc_time_updated' ) > $meta['time'] )  // If filter settings were updated after fetching the keywords of this post
 			) {
-				// aisee_flog( 'Meta _aisee_keywords is stale' );
-				// aisee_flog( 'Difference: ' . ( ( $t - $meta['time'] ) ) );
-				// aisee_flog( 'Was greater than ' . ( 86400 * 7 ) );
 				$meta = false;
 			}
 		} else {
-			// aisee_flog( 'meta for post id ' . $id . ' does not exist. Fetching fresh' );
 		}
-		// aisee_flog( 'stale check complete' );
+
 		if ( ! $meta ) {
 			$args     = array(
 				'httpversion' => '1.1',
@@ -750,9 +753,6 @@ class AISee_GSC {
 				$url,
 				$args
 			);
-			// aisee_flog( $url );
-			// aisee_flog( $args );
-			// aisee_flog( wp_remote_retrieve_body( $response ) );
 			if ( is_wp_error( $response ) ) {
 				if ( wp_doing_ajax() ) {
 					wp_send_json_error( $response->get_error_message() );
@@ -790,10 +790,7 @@ class AISee_GSC {
 						'time'     => time(),
 						'keywords' => $response['data'],
 					);
-					// aisee_flog( 'Updating Meta With:' );
-					// aisee_flog( $meta );
-					$ret = update_post_meta( $id, '_aisee_keywords', $meta );
-					// aisee_flog( "update_post_meta resulted in $ret" );
+					$ret  = update_post_meta( $id, '_aisee_keywords', $meta );
 					$html = $this->generate_html( $id, $meta );
 					if ( wp_doing_ajax() ) {
 						wp_send_json_success( $html );
@@ -809,7 +806,6 @@ class AISee_GSC {
 							'keywords' => array(),
 						)
 					);
-					// aisee_flog( 'No keywords. Update meta returned: ' . $ret );
 					if ( wp_doing_ajax() ) {
 						wp_send_json_success( 'No keywords yet.' );
 					} else {
@@ -818,11 +814,8 @@ class AISee_GSC {
 				}
 			}
 		} else {
-			// aisee_flog( 'generating html' );
 			$html = $this->generate_html( $id, $meta );
-			// aisee_flog( $html );
 			if ( wp_doing_ajax() ) {
-				// aisee_flog( $html );
 				wp_send_json_success( $html );
 			} else {
 				return $html;
@@ -1075,6 +1068,52 @@ aisee_gsc();
 
 function aisee_global_cloud( $echo = true ) {
 
+	$terms = get_terms(
+		array(
+			'taxonomy'   => 'aisee_term',
+			'hide_empty' => false,
+		)
+	);
+
+	$words = array();
+	foreach ( $terms as $key => $value ) {
+		// $value = explode(' ', $value);
+		// aisee_llog( $value['name'] );
+
+		$value = explode( ' ', $value->name );
+		foreach ( $value as $v ) {
+			$words[] = $v;
+		}
+	}
+	// aisee_llog( $terms );
+	$words = array_count_values( $words );
+	// var_dump( $words );
+	arsort( $words );
+	// aisee_llog( $words );
+
+	$avg             = ( max( $words ) + min( $words ) ) / 2;
+	$avg             = $avg / 1.618;
+	$percentage      = array();
+	$drop_percentage = 0;
+	foreach ( $words as $key => $value ) {
+		$percentage[ $key ]['current'] = ( ( $value / count( $words ) ) * 100 ) . '%';
+		$percentage[ $key ]['cutoff']  = $drop_percentage;
+		// echo 'key:'.$key .'value:'.  $value  . ': out of:' . count($keywords). ':' . ( $value / count($keywords)   / 100).'%';
+		// echo $key .':'. ( ($value / count($keywords) ) * ( $drop_percentage / 100 ) );
+		// $percentage[$key] = ( $value * 100 / count($keywords)  );
+		// echo 'cutoff:'.$drop_percentage .': current:' . ( ( $value * 100  * 1000) / count($keywords) )
+		if ( ( $drop_percentage ) > ( ( $value * 100 ) / count( $words ) ) ) {
+			continue;
+		}
+		// $newtags[$key] = ($value + $avg) / $avg;
+		// $newtags[] = '<span style="font-family:impact,sans-serif;font-size:'. (16.81 * (($value + $avg) / $avg) ).'px">'.$key.'</span>';
+		$newtags[] = '<span class="aitag" style="font-size:' . ( 16.18 * ( ( $value + $avg ) / $avg ) ) . 'px">' . $key . '</span>';
+	}
+
+	echo implode( ' ', $newtags );
+	
+	echo '<hr />';
+
 	$cloud = wp_tag_cloud(
 		array(
 			'taxonomy' => 'aisee_term',
@@ -1091,6 +1130,8 @@ function aisee_global_cloud( $echo = true ) {
 		}
 	}
 }
+
+
 
 function aisee_single_cloud( $id = false, $echo = true ) {
 	$aic = AISee_GSC::get_instance();
