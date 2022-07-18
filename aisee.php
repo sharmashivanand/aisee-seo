@@ -47,6 +47,117 @@ class AISee {
 		add_action( 'admin_enqueue_scripts', array( $this, 'plugin_styles' ) ); // enqueue plugin styles but only on the specific screen
 		add_action( 'admin_init', array( $this, 'plugin_data' ) );
 		add_action( 'init', array( $this, 'register_taxonomies' ), 0 );
+
+		add_filter( 'manage_post_posts_columns', array( $this, 'set_custom_edit_post_columns' ) );
+		add_action( 'manage_post_posts_custom_column', array( $this, 'custom_post_column' ), 10, 2 );
+		add_filter( 'manage_page_posts_columns', array( $this, 'set_custom_edit_post_columns' ) );
+		add_action( 'manage_page_posts_custom_column', array( $this, 'custom_post_column' ), 10, 2 );
+	}
+
+	function set_custom_edit_post_columns( $columns ) {
+		// unset( $columns['author'] );
+		unset( $columns['taxonomy-aisee_tag'] );
+		$columns['link_recommendations'] = 'Link Recommendations';
+		// $columns['publisher'] = __( 'Publisher', 'your_text_domain' );
+
+		return $columns;
+	}
+
+	function custom_post_column( $column, $post_id ) {
+		switch ( $column ) {
+
+			case 'link_recommendations':
+				$phrases = get_post_meta( $post_id, '_aisee_keywords', true );
+				//aisee_llog( $phrases );
+				if ( ( ! empty( $phrases ) ) && ( ! empty( $phrases['keywords'] ) ) && count( $phrases['keywords'] ) ) {
+					//trigger_error( '$post_id:' . $post_id );
+					//trigger_error( 'count($phrases[keywords]): ' . count( $phrases['keywords'] ) );
+					//trigger_error( 'empty($phrases[keywords]): ' . empty( $phrases['keywords'] ) );
+					$phrases = $phrases['keywords'];
+					//echo '<pre>' . print_r( $phrases, 1 ) . '</pre>';
+					$data = array();
+					foreach ( $phrases as $k => $v ) {
+						$data[ $v['keys'] ] = $v['impressions'];
+					}
+					arsort( $data );
+					$tags = array();
+					foreach ( $data as $k => $v ) {
+						$tags = array_merge( $tags, explode( ' ', $k ) );
+					}
+
+					$tags = array_map( 'sanitize_text_field', $tags );
+					$tags = array_map( 'strtolower', $tags );
+					$tags = array_filter( $tags );
+					$tags = array_unique( $tags );
+					$tags = array_diff( $tags, $this->stop_words() );
+
+					$query = new WP_Query(
+						array(
+							'post__not_in' => array( $post_id ),
+							'post_type'    => array(
+								'post',
+								'page',
+							),
+							'tax_query'    => array(
+								array(
+									'taxonomy' => 'aisee_tag',
+									'field'    => 'slug',
+									'terms'    => $tags,
+								),
+							),
+						)
+					);
+					if ( $query->have_posts() ) {
+						$recommendations = array();
+						echo '<ol>';
+						while ( $query->have_posts() ) {
+							$query->the_post();
+							$terms       = get_the_terms( get_the_ID(), 'aisee_tag' );
+							$post_aitags = array();
+							foreach ( $terms as $term ) {
+								$post_aitags[] = $term->name;
+							}
+							$post_aitags = implode( ' ', $post_aitags );
+							// aisee_llog( '$data' );
+							//aisee_llog( $data );
+							// aisee_llog( '$terms' );
+							// aisee_llog( $terms );
+							foreach ( $data as $k => $v ) {
+								//$scoreBasis = strlen( $k ) ? strlen( $k ) : 1;
+								//echo $scoreBasis . '$sb<br />';
+								$levscore = levenshtein( $k, $post_aitags, 1, 1, 1 );
+								//echo $levscore . '$lv<br />';
+								//$levscore = 100 - ( ( $levscore / $scoreBasis ) * 100 );
+								//echo $levscore . '$flv<br />';
+								// aisee_llog( '== data begins ==' );
+								// aisee_llog( $k . ':' . $v );
+								// aisee_llog( '== data ends ==' );
+								// echo '<br />';
+								// $scoreBasis = strlen( $k ) ? strlen( $k ) : 1;
+								// $levscore   = levenshtein( $urlslug, $postslug, 1, 1, 1 );
+								// llog($levscore);
+								// $score = 100 - ( ( $levscore / $scoreBasis ) * 100 );
+							}
+							$recommendations[ '<li>['.$levscore.'] <a title="Edit in New Tab" target="_blank" href="' . get_edit_post_link() . '">' . get_the_title() . '</a></li>' ] = $levscore;
+						}
+						asort( $recommendations );
+						//aisee_llog( $recommendations );
+						echo implode( '', array_keys( $recommendations ) );
+						echo '</ol>';
+						echo '<p>Queried: ' . implode( ', ', $tags ) . '</p>';
+					} else {
+						aisee_llog( 'Nothing found for: ' . implode( ' ', $tags ) );
+					}
+					wp_reset_postdata();
+					// echo '<pre>' . print_r( $tags, 1 ) . '</pre>';
+					// echo '<pre>' . print_r( $q, 1 ) . '</pre>';
+				}
+				break;
+		}
+	}
+
+	function stop_words() {
+		return apply_filters( 'aisee_stop_words', array( 'I', 'I\'d', 'I\'ll', 'I\'m', 'I\'ve', 'a', 'about', 'above', 'across', 'add', 'after', 'afterwards', 'again', 'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although', 'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and', 'another', 'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'apr', 'are', 'aren\'t', 'around', 'as', 'at', 'aug', 'back', 'be', 'became', 'because', 'become', 'becomes', 'becoming', 'been', 'before', 'beforehand', 'behind', 'being', 'below', 'beside', 'besides', 'between', 'beyond', 'bill', 'both', 'bottom', 'but', 'by', 'call', 'can', 'can\'t', 'cannot', 'cant', 'co', 'com', 'con', 'could', 'couldn\'t', 'couldnt', 'cry', 'de', 'dec', 'describe', 'detail', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t', 'done', 'down', 'due', 'during', 'each', 'eg', 'eight', 'either', 'eleven', 'else', 'elsewhere', 'empty', 'enough', 'etc', 'even', 'ever', 'every', 'everyone', 'everything', 'everywhere', 'except', 'feb', 'few', 'fifteen', 'fifty', 'fill', 'find', 'fire', 'first', 'five', 'for', 'former', 'formerly', 'forty', 'found', 'four', 'from', 'front', 'full', 'further', 'get', 'give', 'go', 'had', 'hadn\'t', 'has', 'hasn\'t', 'hasnt', 'have', 'haven\'t', 'having', 'he', 'he\'d', 'he\'ll', 'he\'s', 'hence', 'her', 'here', 'here\'s', 'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'how\'s', 'however', 'http', 'https', 'hundred', 'i', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'ie', 'if', 'in', 'inc', 'indeed', 'interest', 'into', 'io', 'is', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'jan', 'jul', 'jun', 'keep', 'last', 'latter', 'latterly', 'least', 'less', 'let\'s', 'ltd', 'made', 'many', 'mar', 'may', 'me', 'meanwhile', 'might', 'mill', 'mine', 'more', 'moreover', 'most', 'mostly', 'move', 'much', 'must', 'mustn\'t', 'my', 'myself', 'name', 'namely', 'neither', 'net', 'never', 'nevertheless', 'next', 'nine', 'no', 'nobody', 'none', 'noone', 'nor', 'not', 'nothing', 'nov', 'now', 'nowhere', 'oct', 'of', 'off', 'often', 'on', 'once', 'one', 'only', 'onto', 'or', 'org', 'other', 'others', 'otherwise', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'part', 'per', 'perhaps', 'please', 'put', 'rather', 're', 'same', 'see', 'seem', 'seemed', 'seeming', 'seems', 'sep', 'serious', 'several', 'shan\'t', 'she', 'she\'d', 'she\'ll', 'she\'s', 'should', 'shouldn\'t', 'show', 'side', 'since', 'sincere', 'six', 'sixty', 'so', 'some', 'somehow', 'someone', 'something', 'sometime', 'sometimes', 'somewhere', 'still', 'such', 'system', 'take', 'ten', 'than', 'that', 'that\'s', 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'thence', 'there', 'there\'s', 'thereafter', 'thereby', 'therefore', 'therein', 'thereupon', 'these', 'they', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve', 'thickv', 'thin', 'third', 'this', 'those', 'though', 'three', 'through', 'throughout', 'thru', 'thus', 'to', 'together', 'too', 'top', 'toward', 'towards', 'twelve', 'twenty', 'two', 'un', 'under', 'until', 'up', 'upon', 'us', 'use', 'very', 'via', 'was', 'wasn\'t', 'we', 'we\'d', 'we\'ll', 'we\'re', 'we\'ve', 'well', 'were', 'weren\'t', 'what', 'what\'s', 'whatever', 'when', 'when\'s', 'whence', 'whenever', 'where', 'where\'s', 'whereafter', 'whereas', 'whereby', 'wherein', 'whereupon', 'wherever', 'whether', 'which', 'while', 'whither', 'who', 'who\'s', 'whoever', 'whole', 'whom', 'whose', 'why', 'why\'s', 'will', 'with', 'within', 'without', 'won\'t', 'would', 'wouldn\'t', 'www', 'yet', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves' ) );
 	}
 
 	function register_taxonomies() {
@@ -115,7 +226,7 @@ class AISee {
 			'add_or_remove_items'        => 'Add or remove AISee tags',
 			'choose_from_most_used'      => 'Choose from the most used AISee tags',
 			'not_found'                  => 'No AISee tags found.',
-			'no_tags'                   => 'No AISee tags',
+			'no_tags'                    => 'No AISee tags',
 			'items_list_navigation'      => 'AISee Tags list navigation',
 			'items_list'                 => 'AISee Tags list',
 			'most_used'                  => 'Most Used',
