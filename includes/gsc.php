@@ -91,7 +91,8 @@ class AISee_GSC {
 	}
 
 	function aisee_dashboard_widget() {
-		aisee_global_cloud();
+		aisee_tax_cloud();
+		aisee_tax_cloud( 'aisee_tag' );
 		// aisee_single_cloud();
 	}
 
@@ -620,6 +621,7 @@ class AISee_GSC {
 		foreach ( $posts as $post ) {
 			set_time_limit( $timeout );
 			aisee_flog( 'Generating Tags for: ' . $post->ID . "\t" . $post->post_title );
+			aisee_flog( PHP_EOL );
 			$this->aisee_populate_taxonomy( array( 'postid' => $post->ID ) );
 			// aisee_flog( $post->post_title );
 		}
@@ -671,6 +673,7 @@ class AISee_GSC {
 			$valid_terms = array();
 			$count       = 0;
 			$limit       = apply_filters( 'aisee_term_limit', 10 );
+			$aitags      = array();
 			foreach ( $kw as $index => $stats ) {
 				$stats['ctr'] = $stats['ctr'] * 100;
 				// aisee_flog( $gsc_filter );
@@ -686,30 +689,65 @@ class AISee_GSC {
 					$stats['impressions'] >= $gsc_filter['impressions']['min'] &&
 					$stats['impressions'] <= $gsc_filter['impressions']['max']
 				) {
-					$valid_terms[] = $stats['keys'];
+
+					$valid_terms[] = $stats['keys']; // phrase
 					// aisee_flog( "\tPost ID " . $request['postid'] . ' will get Tags: ' . $stats['keys'] );
 					if ( $count < $limit ) {
 						wp_insert_term(
 							$stats['keys'], // the term
 							'aisee_term', // the taxonomy
 						);
+						$explosion = explode( ' ', $stats['keys'] );
+						aisee_flog( 'EXPLOSION' );
+						aisee_flog( $explosion );
+						aisee_flog( '/EXPLOSION' );
+						$aitags = array_merge( $aitags, $explosion );
+						$aitags = array_diff( $aitags, $this->stop_words() );
+						aisee_flog( 'Ai Tags Before: ' );
+						aisee_flog( $aitags );
+						foreach ( $aitags as $aitag ) {
+							wp_insert_term(
+								$aitag, // the tag
+								'aisee_tag', // the taxonomy
+							);
+						}
+						// $aitags = implode( ',', $aitags );
+						// aisee_flog( 'Ai Terms: ' .  $stats['keys'] );
+						// aisee_flog( 'Ai Tags After: ' . $aitags );
 					}
 
 					$count++;
-					// aisee_flog( $stats['keys'] . ' will be added as a tag.' );
+					// aisee_flog( 'Processing for ' . $request['postid'] );
+					// aisee_flog( $stats['keys'] . ' : will be added as a term.' );
+					// aisee_flog( $aitags . ' : will be added as tags.' );
 				} else {
 					// aisee_flog( "\tPost ID " . $request['postid'] . ' will NOT GET Tags: ' . $stats['keys'] );
 					// aisee_flog( $stats );
 				}
 			}
 			// wp_set_post_tags( $request['postid'], implode( ',', $valid_terms ), false );
-			wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', false );
+			// aisee_flog( '$valid_terms' );
+			// aisee_flog( $valid_terms );
+			
+			if( ! empty( $valid_terms ) ) {
+				wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', false );
+			}
+			$aitags = array_unique( array_filter( array_map( 'trim', $aitags ) ) );
+			if ( ! empty( $aitags ) ) {
+				aisee_flog( '$aitags' );
+				aisee_flog( $aitags );
+				wp_set_post_terms( $request['postid'], implode( ',', $aitags ), 'aisee_tag', false );
+			}
 			// wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', ! wp_doing_ajax() );
 		}
 
 		if ( wp_doing_ajax() ) {
 			wp_send_json_success( $request );
 		}
+	}
+
+	function stop_words() {
+		return apply_filters( 'aisee_stop_words', array( 'I', 'I\'d', 'I\'ll', 'I\'m', 'I\'ve', 'a', 'about', 'above', 'across', 'add', 'after', 'afterwards', 'again', 'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although', 'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and', 'another', 'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'apr', 'are', 'aren\'t', 'around', 'as', 'at', 'aug', 'back', 'be', 'became', 'because', 'become', 'becomes', 'becoming', 'been', 'before', 'beforehand', 'behind', 'being', 'below', 'beside', 'besides', 'between', 'beyond', 'bill', 'both', 'bottom', 'but', 'by', 'call', 'can', 'can\'t', 'cannot', 'cant', 'co', 'com', 'con', 'could', 'couldn\'t', 'couldnt', 'cry', 'de', 'dec', 'describe', 'detail', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t', 'done', 'down', 'due', 'during', 'each', 'eg', 'eight', 'either', 'eleven', 'else', 'elsewhere', 'empty', 'enough', 'etc', 'even', 'ever', 'every', 'everyone', 'everything', 'everywhere', 'except', 'feb', 'few', 'fifteen', 'fifty', 'fill', 'find', 'fire', 'first', 'five', 'for', 'former', 'formerly', 'forty', 'found', 'four', 'from', 'front', 'full', 'further', 'get', 'give', 'go', 'had', 'hadn\'t', 'has', 'hasn\'t', 'hasnt', 'have', 'haven\'t', 'having', 'he', 'he\'d', 'he\'ll', 'he\'s', 'hence', 'her', 'here', 'here\'s', 'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'how\'s', 'however', 'http', 'https', 'hundred', 'i', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'ie', 'if', 'in', 'inc', 'indeed', 'interest', 'into', 'io', 'is', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'jan', 'jul', 'jun', 'keep', 'last', 'latter', 'latterly', 'least', 'less', 'let\'s', 'ltd', 'made', 'many', 'mar', 'may', 'me', 'meanwhile', 'might', 'mill', 'mine', 'more', 'moreover', 'most', 'mostly', 'move', 'much', 'must', 'mustn\'t', 'my', 'myself', 'name', 'namely', 'neither', 'net', 'never', 'nevertheless', 'next', 'nine', 'no', 'nobody', 'none', 'noone', 'nor', 'not', 'nothing', 'nov', 'now', 'nowhere', 'oct', 'of', 'off', 'often', 'on', 'once', 'one', 'only', 'onto', 'or', 'org', 'other', 'others', 'otherwise', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'part', 'per', 'perhaps', 'please', 'put', 'rather', 're', 'same', 'see', 'seem', 'seemed', 'seeming', 'seems', 'sep', 'serious', 'several', 'shan\'t', 'she', 'she\'d', 'she\'ll', 'she\'s', 'should', 'shouldn\'t', 'show', 'side', 'since', 'sincere', 'six', 'sixty', 'so', 'some', 'somehow', 'someone', 'something', 'sometime', 'sometimes', 'somewhere', 'still', 'such', 'system', 'take', 'ten', 'than', 'that', 'that\'s', 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'thence', 'there', 'there\'s', 'thereafter', 'thereby', 'therefore', 'therein', 'thereupon', 'these', 'they', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve', 'thickv', 'thin', 'third', 'this', 'those', 'though', 'three', 'through', 'throughout', 'thru', 'thus', 'to', 'together', 'too', 'top', 'toward', 'towards', 'twelve', 'twenty', 'two', 'un', 'under', 'until', 'up', 'upon', 'us', 'use', 'very', 'via', 'was', 'wasn\'t', 'we', 'we\'d', 'we\'ll', 'we\'re', 'we\'ve', 'well', 'were', 'weren\'t', 'what', 'what\'s', 'whatever', 'when', 'when\'s', 'whence', 'whenever', 'where', 'where\'s', 'whereafter', 'whereas', 'whereby', 'wherein', 'whereupon', 'wherever', 'whether', 'which', 'while', 'whither', 'who', 'who\'s', 'whoever', 'whole', 'whom', 'whose', 'why', 'why\'s', 'will', 'with', 'within', 'without', 'won\'t', 'would', 'wouldn\'t', 'www', 'yet', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves' ) );
 	}
 
 	function aisee_gsc_fetch( $request = array() ) {
@@ -1064,18 +1102,17 @@ function aisee_gsc() {
 
 aisee_gsc();
 
-
-
-function aisee_global_cloud( $echo = true ) {
+function aisee_tax_cloud( $tax = 'aisee_term', $echo = true ) {
 
 	$terms = get_terms(
 		array(
-			'taxonomy'   => 'aisee_term',
+			'taxonomy'   => $tax,
 			'hide_empty' => false,
 		)
 	);
 
 	$words = array();
+	aisee_flog( $terms );
 	foreach ( $terms as $key => $value ) {
 		// $value = explode(' ', $value);
 		// aisee_llog( $value['name'] );
@@ -1107,22 +1144,22 @@ function aisee_global_cloud( $echo = true ) {
 		}
 		// $newtags[$key] = ($value + $avg) / $avg;
 		// $newtags[] = '<span style="font-family:impact,sans-serif;font-size:'. (16.81 * (($value + $avg) / $avg) ).'px">'.$key.'</span>';
-		$newtags[] = '<span class="aitag" style="font-size:' . ( 16.18 * ( ( $value + $avg ) / $avg ) ) . 'px">' . $key . '</span>';
+		$newtags[] = '<span class="' . $tax . '" style="font-size:' . ( 16.18 * ( ( $value + $avg ) / $avg ) ) . 'px">' . $key . '</span>';
 	}
 
 	echo implode( ' ', $newtags );
-	
+
 	echo '<hr />';
 
 	$cloud = wp_tag_cloud(
 		array(
-			'taxonomy' => 'aisee_term',
+			'taxonomy' => $tax,
 			'number'   => 0,
 			'echo'     => false,
 		)
 	);
 	if ( ! is_wp_error( $cloud ) && ! empty( $cloud ) ) {
-		$cloud = '<div class="aisee_global_cloud">' . $cloud . '</div>';
+		$cloud = '<div class="' . $tax . '_cloud">' . $cloud . '</div>';
 		if ( $echo ) {
 			echo $cloud;
 		} else {
@@ -1130,8 +1167,6 @@ function aisee_global_cloud( $echo = true ) {
 		}
 	}
 }
-
-
 
 function aisee_single_cloud( $id = false, $echo = true ) {
 	$aic = AISee_GSC::get_instance();

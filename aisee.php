@@ -50,7 +50,7 @@ class AISee {
 	}
 
 	function register_taxonomies() {
-		$labels = array(
+		$term_labels = array(
 			'name'                       => 'AISee Terms',
 			'singular_name'              => 'AISee Term',
 			'search_items'               => 'Search AISee Terms',
@@ -82,7 +82,7 @@ class AISee {
 			array(
 				'hierarchical'          => false,
 				'query_var'             => 'term',
-				'labels'                => $labels,
+				'labels'                => $term_labels,
 				'rewrite'               => array(
 					'slug'       => 'term',
 					'with_front' => true,
@@ -93,6 +93,55 @@ class AISee {
 				'_builtin'              => false,
 				'show_in_rest'          => true,
 				'rest_base'             => 'terms',
+				'rest_controller_class' => 'WP_REST_Terms_Controller',
+				'show_tagcloud'         => true,
+			)
+		);
+
+		$tag_labels = array(
+			'name'                       => 'AISee Tags',
+			'singular_name'              => 'AISee Tag',
+			'search_items'               => 'Search AISee Tags',
+			'popular_items'              => 'Popular AISee Tags',
+			'all_items'                  => 'All AISee Tags',
+			'parent_item'                => '',
+			'parent_item_colon'          => '',
+			'edit_item'                  => 'Edit AISee Tag',
+			'view_item'                  => 'View AISee Tag',
+			'update_item'                => 'Update AISee Tag',
+			'add_new_item'               => 'Add New AISee Tag',
+			'new_item_name'              => 'New AISee Tag Name',
+			'separate_items_with_commas' => 'Separate AISee tags with commas',
+			'add_or_remove_items'        => 'Add or remove AISee tags',
+			'choose_from_most_used'      => 'Choose from the most used AISee tags',
+			'not_found'                  => 'No AISee tags found.',
+			'no_tags'                   => 'No AISee tags',
+			'items_list_navigation'      => 'AISee Tags list navigation',
+			'items_list'                 => 'AISee Tags list',
+			'most_used'                  => 'Most Used',
+			'back_to_items'              => '&larr; Back to AISee Tags',
+			'menu_name'                  => 'AISee Tags',
+			'name_admin_bar'             => 'aisee_tag',
+			'archives'                   => 'All AISee Tags',
+		);
+
+		register_taxonomy(
+			'aisee_tag',
+			'post',
+			array(
+				'hierarchical'          => false,
+				'query_var'             => 'aitag',
+				'labels'                => $tag_labels,
+				'rewrite'               => array(
+					'slug'       => 'aitag',
+					'with_front' => true,
+				),
+				'public'                => true,
+				'show_ui'               => true,
+				'show_admin_column'     => true,
+				'_builtin'              => false,
+				'show_in_rest'          => true,
+				'rest_base'             => 'aitags',
 				'rest_controller_class' => 'WP_REST_Terms_Controller',
 				'show_tagcloud'         => true,
 			)
