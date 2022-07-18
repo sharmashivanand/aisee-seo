@@ -56,7 +56,12 @@ class AISee {
 
 	function set_custom_edit_post_columns( $columns ) {
 		// unset( $columns['author'] );
-		unset( $columns['taxonomy-aisee_tag'] );
+		if ( ! empty( $columns['taxonomy-aisee_tag'] ) ) {
+			unset( $columns['taxonomy-aisee_tag'] );
+		}
+		if ( ! empty( $columns['tags'] ) ) {
+			unset( $columns['tags'] );
+		}
 		$columns['link_recommendations'] = 'Link Recommendations';
 		// $columns['publisher'] = __( 'Publisher', 'your_text_domain' );
 
@@ -68,13 +73,13 @@ class AISee {
 
 			case 'link_recommendations':
 				$phrases = get_post_meta( $post_id, '_aisee_keywords', true );
-				//aisee_llog( $phrases );
+				// aisee_llog( $phrases );
 				if ( ( ! empty( $phrases ) ) && ( ! empty( $phrases['keywords'] ) ) && count( $phrases['keywords'] ) ) {
-					//trigger_error( '$post_id:' . $post_id );
-					//trigger_error( 'count($phrases[keywords]): ' . count( $phrases['keywords'] ) );
-					//trigger_error( 'empty($phrases[keywords]): ' . empty( $phrases['keywords'] ) );
+					// trigger_error( '$post_id:' . $post_id );
+					// trigger_error( 'count($phrases[keywords]): ' . count( $phrases['keywords'] ) );
+					// trigger_error( 'empty($phrases[keywords]): ' . empty( $phrases['keywords'] ) );
 					$phrases = $phrases['keywords'];
-					//echo '<pre>' . print_r( $phrases, 1 ) . '</pre>';
+					// echo '<pre>' . print_r( $phrases, 1 ) . '</pre>';
 					$data = array();
 					foreach ( $phrases as $k => $v ) {
 						$data[ $v['keys'] ] = $v['impressions'];
@@ -86,11 +91,25 @@ class AISee {
 					}
 
 					$tags = array_map( 'sanitize_text_field', $tags );
-					$tags = array_map( 'strtolower', $tags );
+					$tags = array_map(
+						function ( $a ) {
+							return preg_replace( '/[\W_]+/u', ' ', $a );
+						},
+						$tags
+					);
 					$tags = array_filter( $tags );
+					
 					$tags = array_unique( $tags );
+					$tags = preg_split( '/[\s,]+/', implode( ',', $tags ) );
+					$tags = array_filter(
+						$tags,
+						function( $v ) {
+							return ( strlen( (string) $v ) > 1 );
+						}
+					);
 					$tags = array_diff( $tags, $this->stop_words() );
-
+					$tags = array_map( 'strtolower', $tags );
+					//aisee_llog($tags);
 					$query = new WP_Query(
 						array(
 							'post__not_in' => array( $post_id ),
@@ -109,7 +128,7 @@ class AISee {
 					);
 					if ( $query->have_posts() ) {
 						$recommendations = array();
-						echo '<ol>';
+						echo '<ul>';
 						while ( $query->have_posts() ) {
 							$query->the_post();
 							$terms       = get_the_terms( get_the_ID(), 'aisee_tag' );
@@ -118,32 +137,14 @@ class AISee {
 								$post_aitags[] = $term->name;
 							}
 							$post_aitags = implode( ' ', $post_aitags );
-							// aisee_llog( '$data' );
-							//aisee_llog( $data );
-							// aisee_llog( '$terms' );
-							// aisee_llog( $terms );
 							foreach ( $data as $k => $v ) {
-								//$scoreBasis = strlen( $k ) ? strlen( $k ) : 1;
-								//echo $scoreBasis . '$sb<br />';
 								$levscore = levenshtein( $k, $post_aitags, 1, 1, 1 );
-								//echo $levscore . '$lv<br />';
-								//$levscore = 100 - ( ( $levscore / $scoreBasis ) * 100 );
-								//echo $levscore . '$flv<br />';
-								// aisee_llog( '== data begins ==' );
-								// aisee_llog( $k . ':' . $v );
-								// aisee_llog( '== data ends ==' );
-								// echo '<br />';
-								// $scoreBasis = strlen( $k ) ? strlen( $k ) : 1;
-								// $levscore   = levenshtein( $urlslug, $postslug, 1, 1, 1 );
-								// llog($levscore);
-								// $score = 100 - ( ( $levscore / $scoreBasis ) * 100 );
 							}
-							$recommendations[ '<li>['.$levscore.'] <a title="Edit in New Tab" target="_blank" href="' . get_edit_post_link() . '">' . get_the_title() . '</a></li>' ] = $levscore;
+							$recommendations[ '<li>[' . $levscore . '] <a title="Edit in New Tab" target="_blank" href="' . get_edit_post_link() . '">' . get_the_title() . '</a></li>' ] = $levscore;
 						}
 						asort( $recommendations );
-						//aisee_llog( $recommendations );
 						echo implode( '', array_keys( $recommendations ) );
-						echo '</ol>';
+						echo '</ul>';
 						echo '<p>Queried: ' . implode( ', ', $tags ) . '</p>';
 					} else {
 						aisee_llog( 'Nothing found for: ' . implode( ' ', $tags ) );
