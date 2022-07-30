@@ -79,6 +79,12 @@ function aisee_llog( $str ) {
 	echo '</pre>';
 }
 
+function aisee_dlog( $vars ) {
+	ob_start();
+	var_dump( $vars );
+	return ob_get_clean();
+}
+
 function aisee_flog( $str ) {
 	$file = trailingslashit( dirname( AISEEFILE ) ) . 'log.log';
 	// file_put_contents( $file, PHP_EOL . '===START===' , FILE_APPEND | LOCK_EX );

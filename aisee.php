@@ -56,12 +56,12 @@ class AISee {
 
 	function set_custom_edit_post_columns( $columns ) {
 		// unset( $columns['author'] );
-		if ( ! empty( $columns['taxonomy-aisee_tag'] ) ) {
+		//if ( ! empty( $columns['taxonomy-aisee_tag'] ) ) {
 			unset( $columns['taxonomy-aisee_tag'] );
-		}
-		if ( ! empty( $columns['tags'] ) ) {
+		//}
+		//if ( ! empty( $columns['tags'] ) ) {
 			unset( $columns['tags'] );
-		}
+		//}
 		$columns['link_recommendations'] = 'Link Recommendations';
 		// $columns['publisher'] = __( 'Publisher', 'your_text_domain' );
 

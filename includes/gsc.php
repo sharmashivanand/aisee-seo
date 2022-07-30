@@ -617,7 +617,7 @@ class AISee_GSC {
 		} else {
 			$timeout = $timeout - 1;
 		}
-		// aisee_flog( $posts );
+		aisee_flog( date( 'c' ) );
 		foreach ( $posts as $post ) {
 			set_time_limit( $timeout );
 			aisee_flog( 'Generating Tags for: ' . $post->ID . "\t" . $post->post_title );
@@ -651,8 +651,21 @@ class AISee_GSC {
 			empty( $meta['keywords'] ) ||
 			! is_array( $meta['keywords'] )
 		) {
+			if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+				aisee_flog( 'Post ID ' . $request['postid'] . ' does not have meta[keywords]. Attempting fresh fetch from GSC' );
+			}
 			$this->aisee_gsc_fetch( array( 'postid' => $request['postid'] ) );
 			$meta = get_post_meta( $request['postid'], '_aisee_keywords', true );
+
+			if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+				aisee_flog( 'New Meta for ' . $request['postid'] . ' is:' );
+				aisee_flog( $meta );
+			}
+		} else {
+			if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+				aisee_flog( 'Post ' . $request['postid'] . ' already has:' );
+				aisee_flog( $meta );
+			}
 		}
 
 		if (
@@ -660,6 +673,10 @@ class AISee_GSC {
 			empty( $meta['keywords'] ) ||
 			! is_array( $meta['keywords'] )
 		) { // no keywords even after a fresh fetch
+			if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+				aisee_flog( 'no keywords even after a fresh fetch for ' . $request['postid'] );
+				aisee_flog( $meta );
+			}
 			if ( wp_doing_ajax() ) {
 				wp_send_json_error( $request );
 			}
@@ -691,7 +708,7 @@ class AISee_GSC {
 				) {
 
 					$valid_terms[] = $stats['keys']; // phrase
-					// aisee_flog( "\tPost ID " . $request['postid'] . ' will get Tags: ' . $stats['keys'] );
+					aisee_flog( "\tPost ID " . $request['postid'] . ' will get Tags: ' . $stats['keys'] );
 					if ( $count < $limit ) {
 						wp_insert_term(
 							$stats['keys'], // the term
@@ -721,15 +738,17 @@ class AISee_GSC {
 					// aisee_flog( $stats['keys'] . ' : will be added as a term.' );
 					// aisee_flog( $aitags . ' : will be added as tags.' );
 				} else {
-					// aisee_flog( "\tPost ID " . $request['postid'] . ' will NOT GET Tags: ' . $stats['keys'] );
-					// aisee_flog( $stats );
+					aisee_flog( "\tPost ID " . $request['postid'] . ' will NOT GET Tags: ' . $stats['keys'] );
+					aisee_flog( $stats );
+					aisee_flog( "\t\nBecause of filter config:" );
+					aisee_flog( $gsc_filter );
 				}
 			}
 			// wp_set_post_tags( $request['postid'], implode( ',', $valid_terms ), false );
 			// aisee_flog( '$valid_terms' );
 			// aisee_flog( $valid_terms );
-			
-			if( ! empty( $valid_terms ) ) {
+
+			if ( ! empty( $valid_terms ) ) {
 				wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', false );
 			}
 			$aitags = array_unique( array_filter( array_map( 'trim', $aitags ) ) );
@@ -774,10 +793,18 @@ class AISee_GSC {
 				( $t - $meta['time'] ) >= ( 86400 * 7 ) || // If the difference is greater than 7 days then fetch fresh
 				( aisee_get_setting( 'gsc_time_updated' ) > $meta['time'] )  // If filter settings were updated after fetching the keywords of this post
 			) {
+				if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+					aisee_flog( 'Fetching fresh because the data is older than 7days.' );
+				}
 				$meta = false;
 			}
 		} else {
+			if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+				aisee_flog( 'Using cached data because the cache is policy mandates 7 days.' );
+			}
 		}
+
+		
 
 		if ( ! $meta ) {
 			$args     = array(
@@ -800,6 +827,7 @@ class AISee_GSC {
 			}
 			$status_code = wp_remote_retrieve_response_code( $response );
 			if ( 200 != $status_code ) {
+				aisee_flog( 'Failed to fetch response from AISee service. Error Code: ' . $status_code );
 				if ( wp_doing_ajax() ) {
 					wp_send_json_error( 'Failed to fetch response from AISee service. Error Code: ' . $status_code );
 				} else {
@@ -1168,13 +1196,21 @@ function aisee_tax_cloud( $tax = 'aisee_term', $echo = true ) {
 	}
 }
 
-function aisee_single_cloud( $id = false, $echo = true ) {
+function aisee_single_cloud( $id = false, $tax = 'aisee_term', $echo = true ) {
 	$aic = AISee_GSC::get_instance();
+
+	$args = array();
+
+	if ( $tax == 'aisee_tag' ) {
+		$args['orderby'] = 'count';
+		$args['order']   = 'DESC';
+		$args['number']  = '5';
+	}
 	if ( $id ) {
-		$terms = wp_get_post_terms( $id, 'aisee_term', array() );
+		$terms = wp_get_post_terms( $id, $tax, $args );
 	} elseif ( is_singular( $aic->get_supported_post_types() ) ) {
 		global $post;
-		$terms = wp_get_post_terms( $post->ID, 'aisee_term', array() );
+		$terms = wp_get_post_terms( $post->ID, $tax, $args );
 	} else {
 		// id not provided and post is not singular / get_supported_post_types
 		return;
