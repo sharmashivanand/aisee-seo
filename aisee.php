@@ -3,7 +3,7 @@
  * Plugin Name: AISee SEO
  * Plugin URI:  https://converticacommerce.com
  * Description: Keyword research and insights for SEOs. Get performance data from Google Search Console. Visalize content as a tag cloud.
- * Version:     2.2
+ * Version:     2.3
  * Author:      Shivanand Sharma
  * Author URI:  https://www.converticacommerce.com
  * Text Domain: aisee

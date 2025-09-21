@@ -2,9 +2,9 @@
 Contributors: varun21, ruchikawp
 Tags: seo, google search console, content analysis, keyword research, search optimization
 Requires at least: 3.7.4
-Tested up to: 5.1
-Requires PHP: 7.0
-Stable tag: 2.2
+Tested up to: 6.8
+Requires PHP: 5.6
+Stable tag: 2.3
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
