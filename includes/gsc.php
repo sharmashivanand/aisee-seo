@@ -804,8 +804,6 @@ class AISee_GSC {
 			}
 		}
 
-		
-
 		if ( ! $meta ) {
 			$args     = array(
 				'httpversion' => '1.1',
@@ -1128,7 +1126,7 @@ function aisee_gsc() {
 	return AISee_GSC::get_instance();
 }
 
-aisee_gsc();
+$aisee_gsc = aisee_gsc();
 
 function aisee_tax_cloud( $tax = 'aisee_term', $echo = true ) {
 
@@ -1244,4 +1242,137 @@ function aisee_single_cloud( $id = false, $tax = 'aisee_term', $echo = true ) {
 			return $output;
 		}
 	}
+}
+
+function aisee_related( $post_id ) {
+
+	// $tag_objects = get_the_terms( $post_id, 'aisee_tag' );
+	$term_objects = get_the_terms( $post_id, 'aisee_term' );
+	if ( $term_objects ) {
+		// aisee_flog( $tag_objects ) ;
+		// aisee_flog( $term_objects );
+	}
+	if ( ! $term_objects || is_wp_error( $term_objects ) ) {
+		// aisee_flog( __FUNCTION__ . 'no terms for post id:' . $post_id );
+		return array();
+	}
+
+	$current_terms = wp_list_pluck( $term_objects, 'name' );
+	$current_terms = aisee_prepare_terms( $current_terms );
+	// aisee_flog( __FUNCTION__ . '$current_terms for post id:' . $post_id );
+	// aisee_flog( $current_terms );
+	$current_terms = array_unique( array_map( 'strtolower', $current_terms ) );
+	// $current_terms = array_diff( $current_terms, array( 'I', 'I\'d', 'I\'ll', 'I\'m', 'I\'ve', 'a', 'about', 'above', 'across', 'add', 'after', 'afterwards', 'again', 'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although', 'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and', 'another', 'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'apr', 'are', 'aren\'t', 'around', 'as', 'at', 'aug', 'back', 'be', 'became', 'because', 'become', 'becomes', 'becoming', 'been', 'before', 'beforehand', 'behind', 'being', 'below', 'beside', 'besides', 'between', 'beyond', 'bill', 'both', 'bottom', 'but', 'by', 'call', 'can', 'can\'t', 'cannot', 'cant', 'co', 'com', 'con', 'could', 'couldn\'t', 'couldnt', 'cry', 'de', 'dec', 'describe', 'detail', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t', 'done', 'down', 'due', 'during', 'each', 'eg', 'eight', 'either', 'eleven', 'else', 'elsewhere', 'empty', 'enough', 'etc', 'even', 'ever', 'every', 'everyone', 'everything', 'everywhere', 'except', 'feb', 'few', 'fifteen', 'fifty', 'fill', 'find', 'fire', 'first', 'five', 'for', 'former', 'formerly', 'forty', 'found', 'four', 'from', 'front', 'full', 'further', 'get', 'give', 'go', 'had', 'hadn\'t', 'has', 'hasn\'t', 'hasnt', 'have', 'haven\'t', 'having', 'he', 'he\'d', 'he\'ll', 'he\'s', 'hence', 'her', 'here', 'here\'s', 'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'how\'s', 'however', 'http', 'https', 'hundred', 'i', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'ie', 'if', 'in', 'inc', 'indeed', 'interest', 'into', 'io', 'is', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'jan', 'jul', 'jun', 'keep', 'last', 'latter', 'latterly', 'least', 'less', 'let\'s', 'ltd', 'made', 'many', 'mar', 'may', 'me', 'meanwhile', 'might', 'mill', 'mine', 'more', 'moreover', 'most', 'mostly', 'move', 'much', 'must', 'mustn\'t', 'my', 'myself', 'name', 'namely', 'neither', 'net', 'never', 'nevertheless', 'next', 'nine', 'no', 'nobody', 'none', 'noone', 'nor', 'not', 'nothing', 'nov', 'now', 'nowhere', 'oct', 'of', 'off', 'often', 'on', 'once', 'one', 'only', 'onto', 'or', 'org', 'other', 'others', 'otherwise', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'part', 'per', 'perhaps', 'please', 'put', 'rather', 're', 'same', 'see', 'seem', 'seemed', 'seeming', 'seems', 'sep', 'serious', 'several', 'shan\'t', 'she', 'she\'d', 'she\'ll', 'she\'s', 'should', 'shouldn\'t', 'show', 'side', 'since', 'sincere', 'six', 'sixty', 'so', 'some', 'somehow', 'someone', 'something', 'sometime', 'sometimes', 'somewhere', 'still', 'such', 'system', 'take', 'ten', 'than', 'that', 'that\'s', 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'thence', 'there', 'there\'s', 'thereafter', 'thereby', 'therefore', 'therein', 'thereupon', 'these', 'they', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve', 'thickv', 'thin', 'third', 'this', 'those', 'though', 'three', 'through', 'throughout', 'thru', 'thus', 'to', 'together', 'too', 'top', 'toward', 'towards', 'twelve', 'twenty', 'two', 'un', 'under', 'until', 'up', 'upon', 'us', 'use', 'very', 'via', 'was', 'wasn\'t', 'we', 'we\'d', 'we\'ll', 'we\'re', 'we\'ve', 'well', 'were', 'weren\'t', 'what', 'what\'s', 'whatever', 'when', 'when\'s', 'whence', 'whenever', 'where', 'where\'s', 'whereafter', 'whereas', 'whereby', 'wherein', 'whereupon', 'wherever', 'whether', 'which', 'while', 'whither', 'who', 'who\'s', 'whoever', 'whole', 'whom', 'whose', 'why', 'why\'s', 'will', 'with', 'within', 'without', 'won\'t', 'would', 'wouldn\'t', 'www', 'yet', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves' ) );
+
+	// sort( $current_terms );
+
+	$args = array(
+		'post_type'      => array( 'post', 'page' ),
+		'posts_per_page' => -1,
+		'fields'         => 'ids',
+		'post__not_in'   => array( $post_id ),
+	);
+
+	$post_ids = get_posts( $args );
+
+	$levenshtein_scores = array();
+
+	foreach ( $post_ids as $id ) {
+		$other_term_objects = get_the_terms( $id, 'aisee_term' );
+		if ( $other_term_objects && ! is_wp_error( $other_term_objects ) ) {
+			$other_terms = wp_list_pluck( $other_term_objects, 'name' );
+
+			$other_terms = aisee_prepare_terms( $other_terms );
+			// sort( $other_terms );
+			$total_score = 0;
+			$comparisons = 0;
+
+			foreach ( $current_terms as $curr_term ) {
+				foreach ( $other_terms as $other_term ) {
+					$curr_term    = preg_replace( '/[^a-zA-Z0-9\s]/', '', $curr_term );
+					$other_term   = preg_replace( '/[^a-zA-Z0-9\s]/', '', $other_term );
+					$total_score += levenshtein( $curr_term, $other_term );
+					$comparisons++;
+				}
+			}
+
+			// Calculate average score for the post
+			$levenshtein_scores[ $id ] = $total_score / $comparisons;
+		}
+	}
+
+	asort( $levenshtein_scores );
+
+	$related_post_ids = $levenshtein_scores;
+
+	// aisee_flog( __FUNCTION__ . ' related_post_ids for post id:' . $post_id );
+	// aisee_flog( $related_post_ids );
+
+	return array_keys( $related_post_ids );
+}
+
+function aisee_prepare_terms( $current_terms ) {
+	$current_terms = array_map(
+		function( $phrase ) {
+			return explode( ' ', $phrase );
+		},
+		$current_terms
+	);
+	$current_terms = array_merge( ...$current_terms );
+	$current_terms = array_unique( array_map( 'strtolower', $current_terms ) );
+	$current_terms = array_diff( $current_terms, array( 'I', 'I\'d', 'I\'ll', 'I\'m', 'I\'ve', 'a', 'about', 'above', 'across', 'add', 'after', 'afterwards', 'again', 'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although', 'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and', 'another', 'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'apr', 'are', 'aren\'t', 'around', 'as', 'at', 'aug', 'back', 'be', 'became', 'because', 'become', 'becomes', 'becoming', 'been', 'before', 'beforehand', 'behind', 'being', 'below', 'beside', 'besides', 'between', 'beyond', 'bill', 'both', 'bottom', 'but', 'by', 'call', 'can', 'can\'t', 'cannot', 'cant', 'co', 'com', 'con', 'could', 'couldn\'t', 'couldnt', 'cry', 'de', 'dec', 'describe', 'detail', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t', 'done', 'down', 'due', 'during', 'each', 'eg', 'eight', 'either', 'eleven', 'else', 'elsewhere', 'empty', 'enough', 'etc', 'even', 'ever', 'every', 'everyone', 'everything', 'everywhere', 'except', 'feb', 'few', 'fifteen', 'fifty', 'fill', 'find', 'fire', 'first', 'five', 'for', 'former', 'formerly', 'forty', 'found', 'four', 'from', 'front', 'full', 'further', 'get', 'give', 'go', 'had', 'hadn\'t', 'has', 'hasn\'t', 'hasnt', 'have', 'haven\'t', 'having', 'he', 'he\'d', 'he\'ll', 'he\'s', 'hence', 'her', 'here', 'here\'s', 'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'how\'s', 'however', 'http', 'https', 'hundred', 'i', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'ie', 'if', 'in', 'inc', 'indeed', 'interest', 'into', 'io', 'is', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'jan', 'jul', 'jun', 'keep', 'last', 'latter', 'latterly', 'least', 'less', 'let\'s', 'ltd', 'made', 'many', 'mar', 'may', 'me', 'meanwhile', 'might', 'mill', 'mine', 'more', 'moreover', 'most', 'mostly', 'move', 'much', 'must', 'mustn\'t', 'my', 'myself', 'name', 'namely', 'neither', 'net', 'never', 'nevertheless', 'next', 'nine', 'no', 'nobody', 'none', 'noone', 'nor', 'not', 'nothing', 'nov', 'now', 'nowhere', 'oct', 'of', 'off', 'often', 'on', 'once', 'one', 'only', 'onto', 'or', 'org', 'other', 'others', 'otherwise', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'part', 'per', 'perhaps', 'please', 'put', 'rather', 're', 'same', 'see', 'seem', 'seemed', 'seeming', 'seems', 'sep', 'serious', 'several', 'shan\'t', 'she', 'she\'d', 'she\'ll', 'she\'s', 'should', 'shouldn\'t', 'show', 'side', 'since', 'sincere', 'six', 'sixty', 'so', 'some', 'somehow', 'someone', 'something', 'sometime', 'sometimes', 'somewhere', 'still', 'such', 'system', 'take', 'ten', 'than', 'that', 'that\'s', 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'thence', 'there', 'there\'s', 'thereafter', 'thereby', 'therefore', 'therein', 'thereupon', 'these', 'they', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve', 'thickv', 'thin', 'third', 'this', 'those', 'though', 'three', 'through', 'throughout', 'thru', 'thus', 'to', 'together', 'too', 'top', 'toward', 'towards', 'twelve', 'twenty', 'two', 'un', 'under', 'until', 'up', 'upon', 'us', 'use', 'very', 'via', 'was', 'wasn\'t', 'we', 'we\'d', 'we\'ll', 'we\'re', 'we\'ve', 'well', 'were', 'weren\'t', 'what', 'what\'s', 'whatever', 'when', 'when\'s', 'whence', 'whenever', 'where', 'where\'s', 'whereafter', 'whereas', 'whereby', 'wherein', 'whereupon', 'wherever', 'whether', 'which', 'while', 'whither', 'who', 'who\'s', 'whoever', 'whole', 'whom', 'whose', 'why', 'why\'s', 'will', 'with', 'within', 'without', 'won\'t', 'would', 'wouldn\'t', 'www', 'yet', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves' ) );
+	// sort( $current_terms );
+	return $current_terms;
+}
+
+function get_cached_related_posts( $post_id, $limit = 5 ) {
+	// Try to get cached results
+	$cache_key      = 'related_posts_' . $post_id;
+	$cached_results = get_transient( $cache_key );
+
+	if ( $cached_results ) {
+		// aisee_flog( __FUNCTION__ . 'cached related_ids' );
+		// aisee_flog( $cached_results );
+		$cached_results = array_slice( array_values( $cached_results ), 0, min( count( $cached_results ), $limit ), true );
+		// aisee_flog( __FUNCTION__ . ' returning ' );
+		// aisee_flog( $cached_results );
+		return $cached_results;
+	}
+	aisee_flog( __FUNCTION__ . ' no cached_results' );
+
+	// If no cache, fetch related posts
+	$related_posts = aisee_related( $post_id );
+
+	// Cache results for 15 days
+	set_transient( $cache_key, $related_posts, 15 * DAY_IN_SECONDS );
+
+	// aisee_flog( __FUNCTION__ . ' related_posts' );
+	// aisee_flog( $related_posts );
+	$related_posts = array_slice( array_values( $related_posts ), 0, min( count( $related_posts ), $limit ), true );
+	// aisee_flog( __FUNCTION__ . 'sliced related' );
+	// aisee_flog( $related_posts );
+	return $related_posts;
+}
+
+add_filter( 'the_content', 'aisee_show_related_posts', 9 );
+
+function aisee_show_related_posts( $content ) {
+	if ( is_page() ) { // for pages, don't show related posts
+		return $content;
+	}
+	global $post;
+	$related_ids = get_cached_related_posts( $post->ID );
+	aisee_flog( __FUNCTION__ . ' related_ids for ' . $post->ID );
+	aisee_flog( $related_ids );
+	if ( empty( $related_ids ) ) {
+		return $content;
+	}
+	$related_list = array();
+	foreach ( $related_ids as $post_id ) {
+		$related_list[] = '<li><a href="' . wp_get_shortlink( $post_id ) . '">' . get_the_title( $post_id ) . '</a></li>';
+	}
+	if ( ! empty( $related_list ) ) {
+		$related_list = '<h3>See Also:</h3><ul>' . implode( '', $related_list ) . '</ul>';
+	}
+	return $content . $related_list;
 }
