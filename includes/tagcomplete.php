@@ -1,6 +1,18 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class AISee_TagComplete {
+	/**
+	 * Get the singleton instance of the AISee_TagComplete class.
+	 *
+	 * Creates a new instance if one doesn't exist and initializes hooks.
+	 *
+	 * @since 2.3
+	 * @return AISee_TagComplete The singleton instance of the AISee_TagComplete class.
+	 */
 	static function get_instance() {
 		static $instance = null;
 		if ( is_null( $instance ) ) {
@@ -10,11 +22,26 @@ class AISee_TagComplete {
 		return $instance;
 	}
 
+	/**
+	 * Initialize WordPress hooks for tag completion functionality.
+	 *
+	 * Sets up metaboxes for Google search suggestions integration.
+	 *
+	 * @since 2.3
+	 */
 	function hooks() {
 		add_action( 'aisee_metaboxes', array( $this, 'add_meta_boxes' ) ); // add metaboxes
 		// add_action( 'admin_enqueue_scripts', [$this, 'admin_enqueue_scripts'] );
 	}
 
+	/**
+	 * Enqueue admin scripts for tag completion.
+	 *
+	 * Currently disabled but can be used to load jQuery UI components
+	 * required for autocomplete functionality.
+	 *
+	 * @since 2.3
+	 */
 	function admin_enqueue_scripts() {
 		// aisee()->plugin_data['Version'],
 		// wp_enqueue_script( 'jquery-ui-autocomplete', false, array('jquery'));
@@ -30,10 +57,27 @@ class AISee_TagComplete {
 	}
 
 
+	/**
+	 * Add meta boxes for search suggestions functionality.
+	 *
+	 * Adds the AISee Search Suggestions meta box to post edit screens
+	 * for Google search autocomplete integration.
+	 *
+	 * @since 2.3
+	 * @param string $post_type The current post type.
+	 */
 	function add_meta_boxes( $post_type ) {
 		add_meta_box( 'aisee-tagcomplete', __( 'AiSee Search Suggestions', 'aisee' ), array( $this, 'aisee_suggestions_mb' ), $post_type, 'normal', 'high' );
 	}
 
+	/**
+	 * Display the search suggestions meta box content.
+	 *
+	 * Renders an autocomplete input field that connects to Google's
+	 * suggestion API to provide search term recommendations.
+	 *
+	 * @since 2.3
+	 */
 	function aisee_suggestions_mb() {
 		echo '<input type="text" id="aisee_suggestions" />';
 
@@ -83,7 +127,15 @@ class AISee_TagComplete {
 					data: {
 						q: term,
 						pws: '0',
-						gl: '<?php if ( get_option( 'timezone_string' ) ) { $tz = timezone_location_get( new DateTimeZone( get_option( 'timezone_string' ) ) )['country_code']; } else { $tz = 'en_US';}echo $tz;?>',
+						gl: '
+						<?php
+						if ( get_option( 'timezone_string' ) ) {
+							$tz = timezone_location_get( new DateTimeZone( get_option( 'timezone_string' ) ) )['country_code'];
+						} else {
+							$tz = 'en_US';
+						}echo $tz;
+						?>
+						',
 						nolabels: 't',
 						client: service.web.client,
 						ds: service.web.ds
@@ -97,9 +149,16 @@ class AISee_TagComplete {
 		</script>
 		<?php
 	}
-
 }
 
+/**
+ * Get the AISee_TagComplete singleton instance.
+ *
+ * Provides global access to the tag completion functionality.
+ *
+ * @since 2.3
+ * @return AISee_TagComplete The AISee_TagComplete singleton instance.
+ */
 function aisee_tagcomplete() {
 	return AISee_TagComplete::get_instance();
 }

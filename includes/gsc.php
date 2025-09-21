@@ -1,6 +1,18 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class AISee_GSC {
+	/**
+	 * Get the singleton instance of the AISee_GSC class.
+	 *
+	 * Creates a new instance if one doesn't exist and initializes hooks.
+	 *
+	 * @since 2.3
+	 * @return AISee_GSC The singleton instance of the AISee_GSC class.
+	 */
 	static function get_instance() {
 		static $instance = null;
 		if ( is_null( $instance ) ) {
@@ -10,6 +22,14 @@ class AISee_GSC {
 		return $instance;
 	}
 
+	/**
+	 * Initialize WordPress hooks and actions for GSC functionality.
+	 *
+	 * Sets up metaboxes, AJAX handlers, dashboard widgets, and scheduled events
+	 * for Google Search Console integration and keyword management.
+	 *
+	 * @since 2.3
+	 */
 	function hooks() {
 		add_action( 'aisee_metaboxes', array( $this, 'add_meta_boxes' ) ); // add metaboxes
 
@@ -43,10 +63,16 @@ class AISee_GSC {
 		}
 
 		add_action( 'aisee_weekly', array( $this, 'aisee_weekly_batch' ) );
-
-		// add_action('add_meta_boxes_post', array( $this, 'my_meta_box_order' ) );
 	}
 
+	/**
+	 * Handle AJAX requests for adding/removing taxonomy terms.
+	 *
+	 * Processes AJAX requests to add or remove AISee terms from posts.
+	 * Includes security checks and validates required parameters.
+	 *
+	 * @since 2.3
+	 */
 	function aisee_tag_action() {
 
 		check_ajax_referer( 'aisee_tag_action', 'aisee_tag_action_nonce' );
@@ -68,7 +94,7 @@ class AISee_GSC {
 			wp_send_json_success( $result );
 		}
 		if ( $_REQUEST['action_type'] == 'add' ) {
-			// wp_remove_object_terms( $id, $word, 'aisee_term' );
+
 			$result = wp_set_post_terms( $id, $word, 'aisee_term', true );
 			if ( is_wp_error( $result ) ) {
 				wp_send_json_error( $result->get_error_message() );
@@ -78,39 +104,85 @@ class AISee_GSC {
 			}
 			wp_send_json_success( $result );
 		}
-
 	}
 
+	/**
+	 * Placeholder for meta box ordering functionality.
+	 *
+	 * Currently empty but can be used to customize the order of meta boxes
+	 * on admin screens.
+	 *
+	 * @since 2.3
+	 */
 	function my_meta_box_order() {
 		global $wp_meta_boxes;
-		// aisee_flog( $wp_meta_boxes );
 	}
 
+	/**
+	 * Add AISee dashboard widget.
+	 *
+	 * Registers a dashboard widget that displays AISee terms and tags
+	 * in tag cloud format on the WordPress admin dashboard.
+	 *
+	 * @since 2.3
+	 */
 	function dashboard_widget() {
 		add_meta_box( 'aisee', 'AISee Terms', array( $this, 'aisee_dashboard_widget' ), 'dashboard', 'normal', 'high' );
 	}
 
+	/**
+	 * Display content for the AISee dashboard widget.
+	 *
+	 * Renders tag clouds for both AISee terms and tags
+	 * within the dashboard widget.
+	 *
+	 * @since 2.3
+	 */
 	function aisee_dashboard_widget() {
 		aisee_tax_cloud();
 		aisee_tax_cloud( 'aisee_tag' );
-		// aisee_single_cloud();
 	}
 
+	/**
+	 * Modify main queries to support AISee tags.
+	 *
+	 * Currently gets supported post types when user is logged in.
+	 * Can be extended to modify query behavior for AISee functionality.
+	 *
+	 * @since 2.3
+	 * @param WP_Query $wp_query The WordPress query object.
+	 */
 	function aisee_tags_support_query( $wp_query ) {
 		if ( is_user_logged_in() && $wp_query->is_main_query() ) {
 			$types = $this->get_supported_post_types();
-			// if ( $wp_query->get( 'term' ) ) {
-			// $wp_query->set( 'post_type', $types );
-			// }
 		}
 	}
 
+	/**
+	 * Add meta boxes for Google Search Console integration.
+	 *
+	 * Adds the main AISee GSC meta box to post edit screens
+	 * for displaying keyword insights and connection status.
+	 *
+	 * @since 2.3
+	 * @param string $post_type The current post type.
+	 */
 	function add_meta_boxes( $post_type ) {
 		add_meta_box( 'aisee-gsc', __( 'AiSee Insights from Google&trade; Search Console', 'aisee' ), array( $this, 'aisee_gsc_mb' ), $post_type, 'normal', 'high' );
 	}
 
+	/**
+	 * Display the Google Search Console meta box content.
+	 *
+	 * Renders different content based on connection status:
+	 * - Registration form if not registered
+	 * - Connect button if registered but not connected
+	 * - Full keyword interface if connected
+	 *
+	 * @since 2.3
+	 */
 	function aisee_gsc_mb() {
-		// delete_option('aiseeseo');
+
 		global $post;
 		?>
 		<div class="aisee-updates">
@@ -182,25 +254,24 @@ class AISee_GSC {
 				});
 				</script>
 				<?php
-			} else {
-				if ( ! aisee_is_connected() ) {
+			} elseif ( ! $this->is_gsc_connected() ) {
 					echo '<p>';
 					echo '<a class="button-primary large aisee-btn" id="aisee_gsc_authenticate" onclick="window.top.location.href = this.getAttribute(\'data-href\')" data-href="' . $this->get_oauth_link( $post->ID, 'aisee_gsc_authenticate' ) . '">Connect with Google&trade; Search Console</a>';
 					echo '</p>';
-				} else { // we are set
-					$meta = get_post_meta( $post->ID, '_aisee_keywords', true );
-					$n_kw = $this->aisee_gsc_fetch( array( 'postid' => $post->ID ) );
-					$html = '';
-					if ( $meta ) {
-						$html = $this->generate_html( $post->ID, $meta );
-					}
-					echo '<table id="aisee_terms_ui"><tr><td><div id="aisee_gsc_keywords">' . $html . '</div></td><td></td></tr><tr><td><p>';
-					echo '<a class="button-primary large aisee-btn" id="aisee_gsc_fetch" href="#">Fetch Data from Google&trade; Search Console</a>';
-					echo '</p></td>';
-					echo '<td><p>';
-					echo '<a class="button-primary large aisee-btn" id="aisee_gsc_revoke" onclick="window.top.location.href = this.getAttribute(\'data-href\')" data-href="' . $this->get_oauth_link( $post->ID, 'aisee_gsc_revoke' ) . '">Disconnect from AiSee SEO</a>';
-					echo '</p></td></tr>';
-					?>
+			} else { // we are set
+				$meta = get_post_meta( $post->ID, '_aisee_keywords', true );
+				$n_kw = $this->aisee_gsc_fetch( array( 'postid' => $post->ID ) );
+				$html = '';
+				if ( $meta ) {
+					$html = $this->generate_html( $post->ID, $meta );
+				}
+				echo '<table id="aisee_terms_ui"><tr><td><div id="aisee_gsc_keywords">' . $html . '</div></td><td></td></tr><tr><td><p>';
+				echo '<a class="button-primary large aisee-btn" id="aisee_gsc_fetch" href="#">Fetch Data from Google&trade; Search Console</a>';
+				echo '</p></td>';
+				echo '<td><p>';
+				echo '<a class="button-primary large aisee-btn" id="aisee_gsc_revoke" onclick="window.top.location.href = this.getAttribute(\'data-href\')" data-href="' . $this->get_oauth_link( $post->ID, 'aisee_gsc_revoke' ) . '">Disconnect from AiSee SEO</a>';
+				echo '</p></td></tr>';
+				?>
 					<tr><td><div id="aiseeseo_gsc_settings"><h3 style="font-weight:500">Keyword Filter</h3>
 					<p><strong>Narrow down to keywords that match the following criteria:</strong></p>
 					<!--<p>Clicks between</p> <div id="aiseeseo_clicks" class="aiseeseo_slider"></div> 
@@ -286,12 +357,12 @@ class AISee_GSC {
 											}
 										}
 										else {
-											// $(this).css('border','5px solid purple');
+
 										}
 									}
 									else { // no response json
 										$(this).css('border','5px solid purple');
-										// $('#aiseeseo_ajax_status').html('<div class="aiseeseo_status_error aiseeseo_status">Failed to get a valid response!</div>').fadeOut(10000);
+
 									}
 								},
 								success: function (response) {
@@ -312,10 +383,10 @@ class AISee_GSC {
 								method: 'POST',
 								data: aisee_populate_taxonomy,
 								complete: function(jqXHR, textStatus){
-									// console.dir(jqXHR);
-									// console.dir(typeof jqXHR.responseJSON.success);
+
+
 									if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('success')){ // success
-										// success / fadeout
+
 										if(jqXHR.responseJSON.success) {
 											$('#aiseeseo_ajax_status').html('<div class="aiseeseo_status_success aiseeseo_status">Settings Updated</div>').fadeOut(10000);
 										}
@@ -332,18 +403,18 @@ class AISee_GSC {
 							}); // ajax post
 						});
 
-						<?php
-						$defaults   = aisee_defaults();
-						$defaults   = $defaults['gsc_filter'];
-						$gsc_filter = aisee_get_setting( 'gsc_filter' );
-						$gsc_filter = array_replace_recursive( $defaults, $gsc_filter );
-						$defaults   = json_encode( $defaults );
+					<?php
+					$defaults   = $this->get_defaults();
+					$defaults   = $defaults['gsc_filter'];
+					$gsc_filter = $this->get_setting( 'gsc_filter' );
+					$gsc_filter = array_replace_recursive( $defaults, $gsc_filter );
+					$defaults   = json_encode( $defaults );
 
-						$gsc_filter = json_encode( $gsc_filter );
+					$gsc_filter = json_encode( $gsc_filter );
 
-						?>
-						aisee_defaults = <?php echo $defaults; ?>;
-						//console.dir(aisee_defaults);
+					?>
+						$this->get_defaults = <?php echo $defaults; ?>;
+
 						gsc_filter = <?php echo $gsc_filter; ?>;
 						console.dir(gsc_filter);
 						$( "#aiseeseo_clicks" ).slider({
@@ -402,7 +473,7 @@ class AISee_GSC {
 								$('#'+$(this).attr('id') + '_min').html(ui.value);
 								$str = $(this).attr('id') + '_min';
 								$str = $str.split('_');
-								//console.log($str);
+
 								gsc_filter[$str[1]][$str[2]] = ui.value
 								
 							}
@@ -410,59 +481,59 @@ class AISee_GSC {
 								$('#'+$(this).attr('id') + '_max').html(ui.value);
 								$str = $(this).attr('id') + '_max';
 								$str = $str.split('_');
-								//console.log($str);
+
 								gsc_filter[$str[1]][$str[2]] = ui.value
 							}
-							//console.dir();
+
 						}
 
 						$('#aiseeseo_gsc_settings_reset').click(function(e){
 							e.preventDefault();
-							//console.dir(aisee_defaults);
-							console.dir(aisee_defaults.clicks.min);
-							console.dir(aisee_defaults.clicks.max);
+
+							console.dir($this->get_defaults.clicks.min);
+							console.dir($this->get_defaults.clicks.max);
 							
-							console.dir(aisee_defaults.impressions.min);
-							console.dir(aisee_defaults.impressions.max);
+							console.dir($this->get_defaults.impressions.min);
+							console.dir($this->get_defaults.impressions.max);
 							
-							console.dir(aisee_defaults.ctr.min);
-							console.dir(aisee_defaults.ctr.max);
+							console.dir($this->get_defaults.ctr.min);
+							console.dir($this->get_defaults.ctr.max);
 
-							console.dir(aisee_defaults.position.min);
-							console.dir(aisee_defaults.position.max);
+							console.dir($this->get_defaults.position.min);
+							console.dir($this->get_defaults.position.max);
 
 
-							// need these first because change eventhandler will fetch from these values when the event fires
 
-							gsc_filter.clicks.min = aisee_defaults.clicks.min;
-							gsc_filter.clicks.max = aisee_defaults.clicks.max;
+
+							gsc_filter.clicks.min = $this->get_defaults.clicks.min;
+							gsc_filter.clicks.max = $this->get_defaults.clicks.max;
 							
-							gsc_filter.impressions.min = aisee_defaults.impressions.min;
-							gsc_filter.impressions.max = aisee_defaults.impressions.max;
+							gsc_filter.impressions.min = $this->get_defaults.impressions.min;
+							gsc_filter.impressions.max = $this->get_defaults.impressions.max;
 
-							gsc_filter.ctr.min = aisee_defaults.ctr.min;
-							gsc_filter.ctr.max = aisee_defaults.ctr.max;
+							gsc_filter.ctr.min = $this->get_defaults.ctr.min;
+							gsc_filter.ctr.max = $this->get_defaults.ctr.max;
 
-							gsc_filter.position.min = aisee_defaults.position.min;
-							gsc_filter.position.max = aisee_defaults.position.max;
+							gsc_filter.position.min = $this->get_defaults.position.min;
+							gsc_filter.position.max = $this->get_defaults.position.max;
 
-							$( "#aiseeseo_clicks" ).slider( "values", 0, aisee_defaults.clicks.min );
-							$( "#aiseeseo_clicks" ).slider( "values", 1, aisee_defaults.clicks.max );
-							$( "#aiseeseo_impressions" ).slider( "values", 0, aisee_defaults.impressions.min );
-							$( "#aiseeseo_impressions" ).slider( "values", 1, aisee_defaults.impressions.max );
-							$( "#aiseeseo_ctr" ).slider( "values", 0, aisee_defaults.ctr.min );
-							$( "#aiseeseo_ctr" ).slider( "values", 1, aisee_defaults.ctr.max );
-							$( "#aiseeseo_position" ).slider( "values", 0, aisee_defaults.position.min );
-							$( "#aiseeseo_position" ).slider( "values", 1, aisee_defaults.position.max );
+							$( "#aiseeseo_clicks" ).slider( "values", 0, $this->get_defaults.clicks.min );
+							$( "#aiseeseo_clicks" ).slider( "values", 1, $this->get_defaults.clicks.max );
+							$( "#aiseeseo_impressions" ).slider( "values", 0, $this->get_defaults.impressions.min );
+							$( "#aiseeseo_impressions" ).slider( "values", 1, $this->get_defaults.impressions.max );
+							$( "#aiseeseo_ctr" ).slider( "values", 0, $this->get_defaults.ctr.min );
+							$( "#aiseeseo_ctr" ).slider( "values", 1, $this->get_defaults.ctr.max );
+							$( "#aiseeseo_position" ).slider( "values", 0, $this->get_defaults.position.min );
+							$( "#aiseeseo_position" ).slider( "values", 1, $this->get_defaults.position.max );
 
-							$( "#aiseeseo_clicks_min" ).html( aisee_defaults.clicks.min );
-							$( "#aiseeseo_clicks_max" ).html( aisee_defaults.clicks.max );
-							$( "#aiseeseo_impressions_min" ).html( aisee_defaults.impressions.min );
-							$( "#aiseeseo_impressions_max" ).html( aisee_defaults.impressions.max );
-							$( "#aiseeseo_ctr_min" ).html( aisee_defaults.ctr.min );
-							$( "#aiseeseo_ctr_max" ).html( aisee_defaults.ctr.max );
-							$( "#aiseeseo_position_min" ).html( aisee_defaults.position.min );
-							$( "#aiseeseo_position_max" ).html( aisee_defaults.position.max );
+							$( "#aiseeseo_clicks_min" ).html( $this->get_defaults.clicks.min );
+							$( "#aiseeseo_clicks_max" ).html( $this->get_defaults.clicks.max );
+							$( "#aiseeseo_impressions_min" ).html( $this->get_defaults.impressions.min );
+							$( "#aiseeseo_impressions_max" ).html( $this->get_defaults.impressions.max );
+							$( "#aiseeseo_ctr_min" ).html( $this->get_defaults.ctr.min );
+							$( "#aiseeseo_ctr_max" ).html( $this->get_defaults.ctr.max );
+							$( "#aiseeseo_position_min" ).html( $this->get_defaults.position.min );
+							$( "#aiseeseo_position_max" ).html( $this->get_defaults.position.max );
 							
 							
 							console.dir('aiseeseo_gsc_settings_reset');
@@ -471,19 +542,19 @@ class AISee_GSC {
 
 						function aisee_save_filter_values(occurance, ui) {
 							console.dir('fired aisee_save_filter_values');
-							// console.dir($(this).attr('id'));
-							// console.dir(occurance);
-							// console.dir(ui);
-							//if(ui.handleIndex == 0) {
-							//	$('#'+$(this).attr('id') + '_min').html(ui.value);
-							//	console.log('targeting:' + '#'+$(this).attr('id') + '_min');
-							//	
-							//}
-							//if(ui.handleIndex == 1) {
-							//	$('#'+$(this).attr('id') + '_max').html(ui.value);
-							//	console.log('targeting:' + '#'+$(this).attr('id') + '_max');
-							//}
-							// console.dir('<?php get_option( 'aiseeseo' ); ?>')
+
+
+
+
+
+
+
+
+
+
+
+
+
 							console.log(gsc_filter);
 							aisee_update_filter = {
 								aisee_update_filter_nonce: '<?php echo wp_create_nonce( 'aisee_update_filter' ); ?>',
@@ -496,10 +567,10 @@ class AISee_GSC {
 								method: 'POST',
 								data: aisee_update_filter,
 								complete: function(jqXHR, textStatus){
-									// console.dir(jqXHR);
-									// console.dir(typeof jqXHR.responseJSON.success);
+
+
 									if(jqXHR.hasOwnProperty('responseJSON') && jqXHR.responseJSON.hasOwnProperty('success')){ // success
-										// success / fadeout
+
 										if(jqXHR.responseJSON.success) {
 											$('#aiseeseo_ajax_status').html('<div class="aiseeseo_status_success aiseeseo_status">Settings Updated</div>').fadeOut(10000);
 										}
@@ -568,46 +639,68 @@ class AISee_GSC {
 					});
 					</script>
 					<?php
-					// $terms =  wp_get_post_terms( $post->ID, 'aisee_term', array() );
-					// foreach($terms as $term) {
-					// echo $term->name . '<br />';
-					// }
-				}
+
 			}
 			?>
 			</div>
 			<?php
 	}
 
+	/**
+	 * Handle AJAX requests to update GSC filter settings.
+	 *
+	 * Updates the Google Search Console filter settings and records
+	 * the timestamp when filters were last updated.
+	 *
+	 * @since 2.3
+	 */
 	function aisee_update_filter() {
 		check_ajax_referer( 'aisee_update_filter', 'aisee_update_filter_nonce' );
-		aisee_update_setting( 'gsc_filter', $_REQUEST['gsc_filter'] );
-		aisee_update_setting( 'gsc_time_updated', time() );
+		$this->update_setting( 'gsc_filter', $_REQUEST['gsc_filter'] );
+		$this->update_setting( 'gsc_time_updated', time() );
 		wp_send_json_success( $_REQUEST );
 	}
 
+	/**
+	 * Handle weekly batch processing of taxonomy generation.
+	 *
+	 * Called by WordPress cron to automatically generate taxonomies
+	 * for all published posts on a weekly schedule.
+	 *
+	 * @since 2.3
+	 */
 	function aisee_weekly_batch() {
 		$this->batch_generate_tax();
 	}
 
+	/**
+	 * Get post types that support AISee terms taxonomy.
+	 *
+	 * Returns an array of post types that have the 'aisee_term' taxonomy
+	 * registered for them.
+	 *
+	 * @since 2.3
+	 * @return array Array of supported post type names.
+	 */
 	function get_supported_post_types() {
 		global $wp_taxonomies;
 		return ( isset( $wp_taxonomies['aisee_term'] ) ) ? $wp_taxonomies['aisee_term']->object_type : array();
 	}
 
+	/**
+	 * Generate taxonomies for all published posts in batch.
+	 *
+	 * Processes all published posts of supported post types to generate
+	 * AISee taxonomies. Includes execution time management to prevent timeouts.
+	 *
+	 * @since 2.3
+	 */
 	function batch_generate_tax() {
 		$args = array(
 			'post_type'      => $this->get_supported_post_types(),
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
-			// 'tax_query'      => array( // only add post meta to those that do not have keywords
-			// array(
-			// 'taxonomy' => 'aisee_term',
-			// 'field'    => 'slug',
-			// 'operator' => 'NOT IN',
-			// 'terms'    => array( '' ),
-			// ),
-			// ),
+
 		);
 		$query   = new WP_Query( $args );
 		$posts   = $query->get_posts();
@@ -617,28 +710,27 @@ class AISee_GSC {
 		} else {
 			$timeout = $timeout - 1;
 		}
-		aisee_flog( date( 'c' ) );
+
 		foreach ( $posts as $post ) {
 			set_time_limit( $timeout );
-			aisee_flog( 'Generating Tags for: ' . $post->ID . "\t" . $post->post_title );
-			aisee_flog( PHP_EOL );
+
 			$this->aisee_populate_taxonomy( array( 'postid' => $post->ID ) );
-			// aisee_flog( $post->post_title );
+
 		}
-		// wp_send_json_success( $query );
 	}
 
 	/**
-	 * Filter and adds terms to post
-	 * Can be called via cron or via wp-ajax on individual post by clicking Populate Taxonomy
+	 * Filter and add terms to a specific post.
 	 *
-	 * @param array $request
-	 * @return void
+	 * Can be called via cron or AJAX to populate post taxonomies based on
+	 * Google Search Console keyword data and current filter settings.
+	 * Applies filtering criteria and generates both terms and tags.
+	 *
+	 * @since 2.3
+	 * @param array $request Request parameters including post ID.
 	 */
 	function aisee_populate_taxonomy( $request = array() ) {
-		// wp_send_json_success( $this->batch_generate_tax() );
-		// print_r( get_post_types( array( 'public' => true ) ) ); return;
-		// wp_send_json_success( get_taxonomies() );
+
 		if ( wp_doing_ajax() ) {
 			check_ajax_referer( 'aisee_populate_taxonomy', 'aisee_generate_tags_nonce' );
 			$request = $_REQUEST;
@@ -652,20 +744,16 @@ class AISee_GSC {
 			! is_array( $meta['keywords'] )
 		) {
 			if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-				aisee_flog( 'Post ID ' . $request['postid'] . ' does not have meta[keywords]. Attempting fresh fetch from GSC' );
+
 			}
 			$this->aisee_gsc_fetch( array( 'postid' => $request['postid'] ) );
 			$meta = get_post_meta( $request['postid'], '_aisee_keywords', true );
 
 			if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-				aisee_flog( 'New Meta for ' . $request['postid'] . ' is:' );
-				aisee_flog( $meta );
+
 			}
-		} else {
-			if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-				aisee_flog( 'Post ' . $request['postid'] . ' already has:' );
-				aisee_flog( $meta );
-			}
+		} elseif ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+
 		}
 
 		if (
@@ -674,27 +762,25 @@ class AISee_GSC {
 			! is_array( $meta['keywords'] )
 		) { // no keywords even after a fresh fetch
 			if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-				aisee_flog( 'no keywords even after a fresh fetch for ' . $request['postid'] );
-				aisee_flog( $meta );
+
 			}
 			if ( wp_doing_ajax() ) {
 				wp_send_json_error( $request );
 			}
 		} else {
-			// aisee_flog( "\taisee_generate_tags processing Post ID " . $request['postid'] . ' MAY get Tags: ' . var_export( $meta, 1 ) );
+
 			$kw = $meta['keywords'];
 			uasort( $kw, fn( $a, $b ) => $a['impressions'] <=> $b['impressions'] );
 			$kw         = array_reverse( $kw );
-			$gsc_filter = aisee_get_setting( 'gsc_filter' );
-			// aisee_flog( $gsc_filter );
+			$gsc_filter = $this->get_setting( 'gsc_filter' );
+
 			$valid_terms = array();
 			$count       = 0;
 			$limit       = apply_filters( 'aisee_term_limit', 10 );
 			$aitags      = array();
 			foreach ( $kw as $index => $stats ) {
 				$stats['ctr'] = $stats['ctr'] * 100;
-				// aisee_flog( $gsc_filter );
-				// aisee_flog( $stats );
+
 				if (
 					$stats['ctr'] >= $gsc_filter['ctr']['min'] &&
 					$stats['ctr'] <= $gsc_filter['ctr']['max'] &&
@@ -708,56 +794,40 @@ class AISee_GSC {
 				) {
 
 					$valid_terms[] = $stats['keys']; // phrase
-					aisee_flog( "\tPost ID " . $request['postid'] . ' will get Tags: ' . $stats['keys'] );
+
 					if ( $count < $limit ) {
 						wp_insert_term(
 							$stats['keys'], // the term
 							'aisee_term', // the taxonomy
 						);
 						$explosion = explode( ' ', $stats['keys'] );
-						aisee_flog( 'EXPLOSION' );
-						aisee_flog( $explosion );
-						aisee_flog( '/EXPLOSION' );
+
 						$aitags = array_merge( $aitags, $explosion );
 						$aitags = array_diff( $aitags, $this->stop_words() );
-						aisee_flog( 'Ai Tags Before: ' );
-						aisee_flog( $aitags );
+
 						foreach ( $aitags as $aitag ) {
 							wp_insert_term(
 								$aitag, // the tag
 								'aisee_tag', // the taxonomy
 							);
 						}
-						// $aitags = implode( ',', $aitags );
-						// aisee_flog( 'Ai Terms: ' .  $stats['keys'] );
-						// aisee_flog( 'Ai Tags After: ' . $aitags );
 					}
 
-					$count++;
-					// aisee_flog( 'Processing for ' . $request['postid'] );
-					// aisee_flog( $stats['keys'] . ' : will be added as a term.' );
-					// aisee_flog( $aitags . ' : will be added as tags.' );
+					++$count;
+
 				} else {
-					aisee_flog( "\tPost ID " . $request['postid'] . ' will NOT GET Tags: ' . $stats['keys'] );
-					aisee_flog( $stats );
-					aisee_flog( "\t\nBecause of filter config:" );
-					aisee_flog( $gsc_filter );
+
 				}
 			}
-			// wp_set_post_tags( $request['postid'], implode( ',', $valid_terms ), false );
-			// aisee_flog( '$valid_terms' );
-			// aisee_flog( $valid_terms );
 
 			if ( ! empty( $valid_terms ) ) {
 				wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', false );
 			}
 			$aitags = array_unique( array_filter( array_map( 'trim', $aitags ) ) );
 			if ( ! empty( $aitags ) ) {
-				aisee_flog( '$aitags' );
-				aisee_flog( $aitags );
+
 				wp_set_post_terms( $request['postid'], implode( ',', $aitags ), 'aisee_tag', false );
 			}
-			// wp_set_post_terms( $request['postid'], implode( ',', $valid_terms ), 'aisee_term', ! wp_doing_ajax() );
 		}
 
 		if ( wp_doing_ajax() ) {
@@ -765,10 +835,30 @@ class AISee_GSC {
 		}
 	}
 
+	/**
+	 * Get the list of stop words for keyword filtering.
+	 *
+	 * Returns an array of common English stop words that should be excluded
+	 * from keyword analysis and taxonomy generation. Uses the 'aisee_stop_words' filter.
+	 *
+	 * @since 2.3
+	 * @return array Array of stop words to filter out.
+	 */
 	function stop_words() {
 		return apply_filters( 'aisee_stop_words', array( 'I', 'I\'d', 'I\'ll', 'I\'m', 'I\'ve', 'a', 'about', 'above', 'across', 'add', 'after', 'afterwards', 'again', 'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although', 'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and', 'another', 'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'apr', 'are', 'aren\'t', 'around', 'as', 'at', 'aug', 'back', 'be', 'became', 'because', 'become', 'becomes', 'becoming', 'been', 'before', 'beforehand', 'behind', 'being', 'below', 'beside', 'besides', 'between', 'beyond', 'bill', 'both', 'bottom', 'but', 'by', 'call', 'can', 'can\'t', 'cannot', 'cant', 'co', 'com', 'con', 'could', 'couldn\'t', 'couldnt', 'cry', 'de', 'dec', 'describe', 'detail', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t', 'done', 'down', 'due', 'during', 'each', 'eg', 'eight', 'either', 'eleven', 'else', 'elsewhere', 'empty', 'enough', 'etc', 'even', 'ever', 'every', 'everyone', 'everything', 'everywhere', 'except', 'feb', 'few', 'fifteen', 'fifty', 'fill', 'find', 'fire', 'first', 'five', 'for', 'former', 'formerly', 'forty', 'found', 'four', 'from', 'front', 'full', 'further', 'get', 'give', 'go', 'had', 'hadn\'t', 'has', 'hasn\'t', 'hasnt', 'have', 'haven\'t', 'having', 'he', 'he\'d', 'he\'ll', 'he\'s', 'hence', 'her', 'here', 'here\'s', 'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'how\'s', 'however', 'http', 'https', 'hundred', 'i', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'ie', 'if', 'in', 'inc', 'indeed', 'interest', 'into', 'io', 'is', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'jan', 'jul', 'jun', 'keep', 'last', 'latter', 'latterly', 'least', 'less', 'let\'s', 'ltd', 'made', 'many', 'mar', 'may', 'me', 'meanwhile', 'might', 'mill', 'mine', 'more', 'moreover', 'most', 'mostly', 'move', 'much', 'must', 'mustn\'t', 'my', 'myself', 'name', 'namely', 'neither', 'net', 'never', 'nevertheless', 'next', 'nine', 'no', 'nobody', 'none', 'noone', 'nor', 'not', 'nothing', 'nov', 'now', 'nowhere', 'oct', 'of', 'off', 'often', 'on', 'once', 'one', 'only', 'onto', 'or', 'org', 'other', 'others', 'otherwise', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'part', 'per', 'perhaps', 'please', 'put', 'rather', 're', 'same', 'see', 'seem', 'seemed', 'seeming', 'seems', 'sep', 'serious', 'several', 'shan\'t', 'she', 'she\'d', 'she\'ll', 'she\'s', 'should', 'shouldn\'t', 'show', 'side', 'since', 'sincere', 'six', 'sixty', 'so', 'some', 'somehow', 'someone', 'something', 'sometime', 'sometimes', 'somewhere', 'still', 'such', 'system', 'take', 'ten', 'than', 'that', 'that\'s', 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'thence', 'there', 'there\'s', 'thereafter', 'thereby', 'therefore', 'therein', 'thereupon', 'these', 'they', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve', 'thickv', 'thin', 'third', 'this', 'those', 'though', 'three', 'through', 'throughout', 'thru', 'thus', 'to', 'together', 'too', 'top', 'toward', 'towards', 'twelve', 'twenty', 'two', 'un', 'under', 'until', 'up', 'upon', 'us', 'use', 'very', 'via', 'was', 'wasn\'t', 'we', 'we\'d', 'we\'ll', 'we\'re', 'we\'ve', 'well', 'were', 'weren\'t', 'what', 'what\'s', 'whatever', 'when', 'when\'s', 'whence', 'whenever', 'where', 'where\'s', 'whereafter', 'whereas', 'whereby', 'wherein', 'whereupon', 'wherever', 'whether', 'which', 'while', 'whither', 'who', 'who\'s', 'whoever', 'whole', 'whom', 'whose', 'why', 'why\'s', 'will', 'with', 'within', 'without', 'won\'t', 'would', 'wouldn\'t', 'www', 'yet', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves' ) );
 	}
 
+	/**
+	 * Fetch keyword data from Google Search Console API.
+	 *
+	 * Retrieves GSC data for a specific post, either from cache or fresh from API.
+	 * Handles different call contexts (AJAX, cron, CLI) and manages data freshness
+	 * based on age and filter update timestamps.
+	 *
+	 * @since 2.3
+	 * @param array $request Request parameters including post ID.
+	 * @return string|void HTML content for AJAX responses, void for other contexts.
+	 */
 	function aisee_gsc_fetch( $request = array() ) {
 		if ( wp_doing_ajax() ) {
 			check_ajax_referer( 'aisee_gsc_fetch', 'aisee_gsc_fetch_nonce' );
@@ -777,7 +867,7 @@ class AISee_GSC {
 		$id  = sanitize_text_field( $request['postid'] );
 		$url = $this->get_oauth_link( $id, 'aisee_gsc_fetch' );
 		$url = add_query_arg( 'cb', time(), $url );
-		$url = add_query_arg( 'status', aisee_get_status(), $url );
+		$url = add_query_arg( 'status', $this->get_status(), $url );
 		if ( get_post_status( $id ) != 'publish' ) {
 			if ( wp_doing_ajax() ) {
 				wp_send_json_success( 'Post is not published or is not public.' );
@@ -791,17 +881,15 @@ class AISee_GSC {
 			$t = time();
 			if ( empty( $meta['time'] ) ||
 				( $t - $meta['time'] ) >= ( 86400 * 7 ) || // If the difference is greater than 7 days then fetch fresh
-				( aisee_get_setting( 'gsc_time_updated' ) > $meta['time'] )  // If filter settings were updated after fetching the keywords of this post
+				( $this->get_setting( 'gsc_time_updated' ) > $meta['time'] )  // If filter settings were updated after fetching the keywords of this post
 			) {
 				if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-					aisee_flog( 'Fetching fresh because the data is older than 7days.' );
+
 				}
 				$meta = false;
 			}
-		} else {
-			if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-				aisee_flog( 'Using cached data because the cache is policy mandates 7 days.' );
-			}
+		} elseif ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+
 		}
 
 		if ( ! $meta ) {
@@ -825,7 +913,7 @@ class AISee_GSC {
 			}
 			$status_code = wp_remote_retrieve_response_code( $response );
 			if ( 200 != $status_code ) {
-				aisee_flog( 'Failed to fetch response from AISee service. Error Code: ' . $status_code );
+
 				if ( wp_doing_ajax() ) {
 					wp_send_json_error( 'Failed to fetch response from AISee service. Error Code: ' . $status_code );
 				} else {
@@ -887,12 +975,23 @@ class AISee_GSC {
 		}
 	}
 
+	/**
+	 * Generate HTML table for displaying keyword data.
+	 *
+	 * Creates an HTML table showing keyword phrases, clicks, CTR, impressions,
+	 * and position data with add/remove buttons for taxonomy management.
+	 *
+	 * @since 2.3
+	 * @param int   $id The post ID.
+	 * @param array $meta The keyword metadata array.
+	 * @return string The generated HTML table.
+	 */
 	function generate_html( $id, $meta ) {
 		$html     = '';
 		$keywords = ! empty( $meta['keywords'] ) ? $meta['keywords'] : false;
-		// aisee_flog( $meta );
+
 		if ( ! $keywords ) {
-			// aisee_flog( '! $keywords' );
+
 			return;
 		}
 		$tagged_terms = wp_get_post_terms( $id, 'aisee_term', array() );
@@ -901,10 +1000,8 @@ class AISee_GSC {
 			$aisee_tags[] = $term->name;
 		}
 
-		// aisee_flog( '$aisee_tags' );
-		// aisee_flog( $aisee_tags );
 		if ( count( $keywords ) ) {
-			uasort( $keywords, fn( $a, $b) => $a['impressions'] <=> $b['impressions'] );
+			uasort( $keywords, fn( $a, $b ) => $a['impressions'] <=> $b['impressions'] );
 			$keywords = array_reverse( $keywords );
 			foreach ( $keywords as $key => $value ) {
 				$action       = 'add';
@@ -916,15 +1013,13 @@ class AISee_GSC {
 
 					$action       = 'remove';
 					$action_label = '-';
-					// unset( $aisee_tags[ $kw ] );
+
 					unset( $aisee_tags[ array_search( $kw, $aisee_tags ) ] );
 				}
 				$html .= '<tr><td>' . $value['keys'] . '</td><td>' . $value['clicks'] . '</td><td>' . round( ( 100 * $value['ctr'] ), 2 ) . '%</td><td>' . $value['impressions'] . '</td><td>' . round( $value['position'], 2 ) . '</td><td><span title="' . ucwords( $action ) . ' Keyword" class="aisee-action aisee-action-' . $action . '">' . $action_label . '</span></td></tr>';
 			}
-
-			// $html = '<table id="aisee_gsc_keywords_tbl"><thead><tr><th class="sortable">Keyword Phrase</th><th class="sortable">Clicks</th><th class="sortable">CTR</th><th class="sortable">Impressions</th><th class="sortable">Position</th><th></th></tr></thead>' . $html . '</table>';
 		} else {
-			// $html = '';
+
 		}
 		$tags_html = '';
 		foreach ( $aisee_tags as $aisee_tag ) {
@@ -989,6 +1084,15 @@ class AISee_GSC {
 		return $html;
 	}
 
+	/**
+	 * Handle OAuth callbacks and profile saving.
+	 *
+	 * Processes OAuth authentication results from Google Search Console
+	 * and updates the connection status accordingly. Handles both
+	 * connection and revocation scenarios.
+	 *
+	 * @since 2.3
+	 */
 	function save_gsc_profile() {
 		if ( isset( $_REQUEST['aisee-action'] ) && $_REQUEST['aisee-action'] == 'oauth' ) {
 			wp_verify_nonce( $_REQUEST['origin_nonce'], 'aisee_gscapi' );
@@ -1016,6 +1120,17 @@ class AISee_GSC {
 		}
 	}
 
+	/**
+	 * Generate OAuth authentication link for Google Search Console.
+	 *
+	 * Creates a secure authentication URL with encoded state variables
+	 * for connecting to Google Search Console API.
+	 *
+	 * @since 2.3
+	 * @param int    $id The post ID for context.
+	 * @param string $action The action type (authenticate, fetch, revoke).
+	 * @return string|void The OAuth URL, or void if no account exists.
+	 */
 	function get_oauth_link( $id, $action = false ) {
 		$statevars = array(
 			'site_url'       => trailingslashit( get_site_url() ),
@@ -1028,14 +1143,21 @@ class AISee_GSC {
 		if ( ! $account ) {
 			return;
 		}
-		$statevars = aisee_encode( array_merge( $account, $statevars ) );
+		$statevars = $this->encode( array_merge( $account, $statevars ) );
 		$auth      = add_query_arg( $action, $statevars, AISEEAPIEPSL );
 		$auth      = add_query_arg( 'aisee_action', $action, $auth );
-		// aisee_flog( $auth );
-		return $auth;
 
+		return $auth;
 	}
 
+	/**
+	 * Handle AJAX requests for connection link generation.
+	 *
+	 * Generates and returns HTML for Google Search Console connection button
+	 * with proper OAuth link and security checks.
+	 *
+	 * @since 2.3
+	 */
 	function get_connect_link() {
 		check_ajax_referer( 'get_connect_link', 'get_connect_link_nonce' );
 		$id = ! empty( $_REQUEST['post_id'] ) ? sanitize_text_field( $_REQUEST['post_id'] ) : false;
@@ -1050,6 +1172,14 @@ class AISee_GSC {
 		wp_send_json_success( '<a class="button-primary large" data-href="' . $auth . '" onclick="window.top.location.href = this.getAttribute(\'data-href\')" >Connect with Google&trade; Search Console</a>' );
 	}
 
+	/**
+	 * Handle AJAX user registration with AISee service.
+	 *
+	 * Processes user registration requests, validates input data,
+	 * and communicates with the AISee API to create a new account.
+	 *
+	 * @since 2.3
+	 */
 	function aisee_register() {
 		check_ajax_referer( 'aisee_register', 'aisee_register_nonce' );
 		global $wp_version;
@@ -1078,7 +1208,7 @@ class AISee_GSC {
 				'cachebust'      => microtime(),
 			),
 		);
-		$args     = aisee_encode( $args );
+		$args     = $this->encode( $args );
 		$url      = add_query_arg(
 			'aisee_action',
 			'aisee_register',
@@ -1114,20 +1244,47 @@ class AISee_GSC {
 				wp_send_json_error( 'Invalid server response.' );
 			}
 		}
-
 	}
 
+	/**
+	 * Get the stored account information for API connections.
+	 *
+	 * Retrieves the AISee account data needed for API authentication
+	 * and OAuth processes.
+	 *
+	 * @since 2.3
+	 * @return array|false The account data array, or false if not found.
+	 */
 	function get_connectable_account() {
 		return get_option( 'aiseeseo' );
 	}
 }
 
+/**
+ * Get the AISee_GSC singleton instance.
+ *
+ * Provides global access to the Google Search Console integration functionality.
+ *
+ * @since 2.3
+ * @return AISee_GSC The AISee_GSC singleton instance.
+ */
 function aisee_gsc() {
 	return AISee_GSC::get_instance();
 }
 
 $aisee_gsc = aisee_gsc();
 
+/**
+ * Generate and display a tag cloud for AISee taxonomies.
+ *
+ * Creates both a custom-weighted tag cloud and WordPress native tag cloud
+ * for the specified taxonomy. Uses word frequency analysis and custom styling.
+ *
+ * @since 2.3
+ * @param string $tax The taxonomy to generate cloud for (default: 'aisee_term').
+ * @param bool   $echo Whether to echo output or return it (default: true).
+ * @return string|void The tag cloud HTML if $echo is false, void otherwise.
+ */
 function aisee_tax_cloud( $tax = 'aisee_term', $echo = true ) {
 
 	$terms = get_terms(
@@ -1138,21 +1295,18 @@ function aisee_tax_cloud( $tax = 'aisee_term', $echo = true ) {
 	);
 
 	$words = array();
-	aisee_flog( $terms );
+
 	foreach ( $terms as $key => $value ) {
-		// $value = explode(' ', $value);
-		// aisee_llog( $value['name'] );
 
 		$value = explode( ' ', $value->name );
 		foreach ( $value as $v ) {
 			$words[] = $v;
 		}
 	}
-	// aisee_llog( $terms );
+
 	$words = array_count_values( $words );
-	// var_dump( $words );
+
 	arsort( $words );
-	// aisee_llog( $words );
 
 	$avg             = ( max( $words ) + min( $words ) ) / 2;
 	$avg             = $avg / 1.618;
@@ -1161,15 +1315,11 @@ function aisee_tax_cloud( $tax = 'aisee_term', $echo = true ) {
 	foreach ( $words as $key => $value ) {
 		$percentage[ $key ]['current'] = ( ( $value / count( $words ) ) * 100 ) . '%';
 		$percentage[ $key ]['cutoff']  = $drop_percentage;
-		// echo 'key:'.$key .'value:'.  $value  . ': out of:' . count($keywords). ':' . ( $value / count($keywords)   / 100).'%';
-		// echo $key .':'. ( ($value / count($keywords) ) * ( $drop_percentage / 100 ) );
-		// $percentage[$key] = ( $value * 100 / count($keywords)  );
-		// echo 'cutoff:'.$drop_percentage .': current:' . ( ( $value * 100  * 1000) / count($keywords) )
+
 		if ( ( $drop_percentage ) > ( ( $value * 100 ) / count( $words ) ) ) {
 			continue;
 		}
-		// $newtags[$key] = ($value + $avg) / $avg;
-		// $newtags[] = '<span style="font-family:impact,sans-serif;font-size:'. (16.81 * (($value + $avg) / $avg) ).'px">'.$key.'</span>';
+
 		$newtags[] = '<span class="' . $tax . '" style="font-size:' . ( 16.18 * ( ( $value + $avg ) / $avg ) ) . 'px">' . $key . '</span>';
 	}
 
@@ -1194,6 +1344,18 @@ function aisee_tax_cloud( $tax = 'aisee_term', $echo = true ) {
 	}
 }
 
+/**
+ * Generate a tag cloud for a single post or current post.
+ *
+ * Creates a tag cloud showing the AISee terms or tags associated with
+ * a specific post. Handles both explicit post ID and current post context.
+ *
+ * @since 2.3
+ * @param int|false $id The post ID, or false to use current post.
+ * @param string    $tax The taxonomy to display (default: 'aisee_term').
+ * @param bool      $echo Whether to echo output or return it (default: true).
+ * @return string|void The tag cloud HTML if $echo is false, void otherwise.
+ */
 function aisee_single_cloud( $id = false, $tax = 'aisee_term', $echo = true ) {
 	$aic = AISee_GSC::get_instance();
 
@@ -1210,7 +1372,7 @@ function aisee_single_cloud( $id = false, $tax = 'aisee_term', $echo = true ) {
 		global $post;
 		$terms = wp_get_post_terms( $post->ID, $tax, $args );
 	} else {
-		// id not provided and post is not singular / get_supported_post_types
+
 		return;
 	}
 
@@ -1244,27 +1406,29 @@ function aisee_single_cloud( $id = false, $tax = 'aisee_term', $echo = true ) {
 	}
 }
 
+/**
+ * Find related posts based on AISee term similarity.
+ *
+ * Uses Levenshtein distance algorithm to find posts with similar
+ * AISee terms, providing content recommendations based on keyword overlap.
+ *
+ * @since 2.3
+ * @param int $post_id The post ID to find related posts for.
+ * @return array Array of related post IDs sorted by similarity score.
+ */
 function aisee_related( $post_id ) {
 
-	// $tag_objects = get_the_terms( $post_id, 'aisee_tag' );
 	$term_objects = get_the_terms( $post_id, 'aisee_term' );
 	if ( $term_objects ) {
-		// aisee_flog( $tag_objects ) ;
-		// aisee_flog( $term_objects );
+
 	}
 	if ( ! $term_objects || is_wp_error( $term_objects ) ) {
-		// aisee_flog( __FUNCTION__ . 'no terms for post id:' . $post_id );
 		return array();
 	}
 
 	$current_terms = wp_list_pluck( $term_objects, 'name' );
 	$current_terms = aisee_prepare_terms( $current_terms );
-	// aisee_flog( __FUNCTION__ . '$current_terms for post id:' . $post_id );
-	// aisee_flog( $current_terms );
 	$current_terms = array_unique( array_map( 'strtolower', $current_terms ) );
-	// $current_terms = array_diff( $current_terms, array( 'I', 'I\'d', 'I\'ll', 'I\'m', 'I\'ve', 'a', 'about', 'above', 'across', 'add', 'after', 'afterwards', 'again', 'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although', 'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and', 'another', 'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'apr', 'are', 'aren\'t', 'around', 'as', 'at', 'aug', 'back', 'be', 'became', 'because', 'become', 'becomes', 'becoming', 'been', 'before', 'beforehand', 'behind', 'being', 'below', 'beside', 'besides', 'between', 'beyond', 'bill', 'both', 'bottom', 'but', 'by', 'call', 'can', 'can\'t', 'cannot', 'cant', 'co', 'com', 'con', 'could', 'couldn\'t', 'couldnt', 'cry', 'de', 'dec', 'describe', 'detail', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t', 'done', 'down', 'due', 'during', 'each', 'eg', 'eight', 'either', 'eleven', 'else', 'elsewhere', 'empty', 'enough', 'etc', 'even', 'ever', 'every', 'everyone', 'everything', 'everywhere', 'except', 'feb', 'few', 'fifteen', 'fifty', 'fill', 'find', 'fire', 'first', 'five', 'for', 'former', 'formerly', 'forty', 'found', 'four', 'from', 'front', 'full', 'further', 'get', 'give', 'go', 'had', 'hadn\'t', 'has', 'hasn\'t', 'hasnt', 'have', 'haven\'t', 'having', 'he', 'he\'d', 'he\'ll', 'he\'s', 'hence', 'her', 'here', 'here\'s', 'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'how\'s', 'however', 'http', 'https', 'hundred', 'i', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'ie', 'if', 'in', 'inc', 'indeed', 'interest', 'into', 'io', 'is', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'jan', 'jul', 'jun', 'keep', 'last', 'latter', 'latterly', 'least', 'less', 'let\'s', 'ltd', 'made', 'many', 'mar', 'may', 'me', 'meanwhile', 'might', 'mill', 'mine', 'more', 'moreover', 'most', 'mostly', 'move', 'much', 'must', 'mustn\'t', 'my', 'myself', 'name', 'namely', 'neither', 'net', 'never', 'nevertheless', 'next', 'nine', 'no', 'nobody', 'none', 'noone', 'nor', 'not', 'nothing', 'nov', 'now', 'nowhere', 'oct', 'of', 'off', 'often', 'on', 'once', 'one', 'only', 'onto', 'or', 'org', 'other', 'others', 'otherwise', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'part', 'per', 'perhaps', 'please', 'put', 'rather', 're', 'same', 'see', 'seem', 'seemed', 'seeming', 'seems', 'sep', 'serious', 'several', 'shan\'t', 'she', 'she\'d', 'she\'ll', 'she\'s', 'should', 'shouldn\'t', 'show', 'side', 'since', 'sincere', 'six', 'sixty', 'so', 'some', 'somehow', 'someone', 'something', 'sometime', 'sometimes', 'somewhere', 'still', 'such', 'system', 'take', 'ten', 'than', 'that', 'that\'s', 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'thence', 'there', 'there\'s', 'thereafter', 'thereby', 'therefore', 'therein', 'thereupon', 'these', 'they', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve', 'thickv', 'thin', 'third', 'this', 'those', 'though', 'three', 'through', 'throughout', 'thru', 'thus', 'to', 'together', 'too', 'top', 'toward', 'towards', 'twelve', 'twenty', 'two', 'un', 'under', 'until', 'up', 'upon', 'us', 'use', 'very', 'via', 'was', 'wasn\'t', 'we', 'we\'d', 'we\'ll', 'we\'re', 'we\'ve', 'well', 'were', 'weren\'t', 'what', 'what\'s', 'whatever', 'when', 'when\'s', 'whence', 'whenever', 'where', 'where\'s', 'whereafter', 'whereas', 'whereby', 'wherein', 'whereupon', 'wherever', 'whether', 'which', 'while', 'whither', 'who', 'who\'s', 'whoever', 'whole', 'whom', 'whose', 'why', 'why\'s', 'will', 'with', 'within', 'without', 'won\'t', 'would', 'wouldn\'t', 'www', 'yet', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves' ) );
-
-	// sort( $current_terms );
 
 	$args = array(
 		'post_type'      => array( 'post', 'page' ),
@@ -1283,7 +1447,7 @@ function aisee_related( $post_id ) {
 			$other_terms = wp_list_pluck( $other_term_objects, 'name' );
 
 			$other_terms = aisee_prepare_terms( $other_terms );
-			// sort( $other_terms );
+
 			$total_score = 0;
 			$comparisons = 0;
 
@@ -1292,11 +1456,10 @@ function aisee_related( $post_id ) {
 					$curr_term    = preg_replace( '/[^a-zA-Z0-9\s]/', '', $curr_term );
 					$other_term   = preg_replace( '/[^a-zA-Z0-9\s]/', '', $other_term );
 					$total_score += levenshtein( $curr_term, $other_term );
-					$comparisons++;
+					++$comparisons;
 				}
 			}
 
-			// Calculate average score for the post
 			$levenshtein_scores[ $id ] = $total_score / $comparisons;
 		}
 	}
@@ -1305,15 +1468,22 @@ function aisee_related( $post_id ) {
 
 	$related_post_ids = $levenshtein_scores;
 
-	// aisee_flog( __FUNCTION__ . ' related_post_ids for post id:' . $post_id );
-	// aisee_flog( $related_post_ids );
-
 	return array_keys( $related_post_ids );
 }
 
+/**
+ * Prepare and clean terms for comparison.
+ *
+ * Breaks down phrase terms into individual words, removes stop words,
+ * and normalizes text for accurate similarity comparisons.
+ *
+ * @since 2.3
+ * @param array $current_terms Array of term phrases to prepare.
+ * @return array Array of cleaned individual words.
+ */
 function aisee_prepare_terms( $current_terms ) {
 	$current_terms = array_map(
-		function( $phrase ) {
+		function ( $phrase ) {
 			return explode( ' ', $phrase );
 		},
 		$current_terms
@@ -1321,49 +1491,59 @@ function aisee_prepare_terms( $current_terms ) {
 	$current_terms = array_merge( ...$current_terms );
 	$current_terms = array_unique( array_map( 'strtolower', $current_terms ) );
 	$current_terms = array_diff( $current_terms, array( 'I', 'I\'d', 'I\'ll', 'I\'m', 'I\'ve', 'a', 'about', 'above', 'across', 'add', 'after', 'afterwards', 'again', 'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although', 'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and', 'another', 'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'apr', 'are', 'aren\'t', 'around', 'as', 'at', 'aug', 'back', 'be', 'became', 'because', 'become', 'becomes', 'becoming', 'been', 'before', 'beforehand', 'behind', 'being', 'below', 'beside', 'besides', 'between', 'beyond', 'bill', 'both', 'bottom', 'but', 'by', 'call', 'can', 'can\'t', 'cannot', 'cant', 'co', 'com', 'con', 'could', 'couldn\'t', 'couldnt', 'cry', 'de', 'dec', 'describe', 'detail', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t', 'done', 'down', 'due', 'during', 'each', 'eg', 'eight', 'either', 'eleven', 'else', 'elsewhere', 'empty', 'enough', 'etc', 'even', 'ever', 'every', 'everyone', 'everything', 'everywhere', 'except', 'feb', 'few', 'fifteen', 'fifty', 'fill', 'find', 'fire', 'first', 'five', 'for', 'former', 'formerly', 'forty', 'found', 'four', 'from', 'front', 'full', 'further', 'get', 'give', 'go', 'had', 'hadn\'t', 'has', 'hasn\'t', 'hasnt', 'have', 'haven\'t', 'having', 'he', 'he\'d', 'he\'ll', 'he\'s', 'hence', 'her', 'here', 'here\'s', 'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'how\'s', 'however', 'http', 'https', 'hundred', 'i', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'ie', 'if', 'in', 'inc', 'indeed', 'interest', 'into', 'io', 'is', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'jan', 'jul', 'jun', 'keep', 'last', 'latter', 'latterly', 'least', 'less', 'let\'s', 'ltd', 'made', 'many', 'mar', 'may', 'me', 'meanwhile', 'might', 'mill', 'mine', 'more', 'moreover', 'most', 'mostly', 'move', 'much', 'must', 'mustn\'t', 'my', 'myself', 'name', 'namely', 'neither', 'net', 'never', 'nevertheless', 'next', 'nine', 'no', 'nobody', 'none', 'noone', 'nor', 'not', 'nothing', 'nov', 'now', 'nowhere', 'oct', 'of', 'off', 'often', 'on', 'once', 'one', 'only', 'onto', 'or', 'org', 'other', 'others', 'otherwise', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'part', 'per', 'perhaps', 'please', 'put', 'rather', 're', 'same', 'see', 'seem', 'seemed', 'seeming', 'seems', 'sep', 'serious', 'several', 'shan\'t', 'she', 'she\'d', 'she\'ll', 'she\'s', 'should', 'shouldn\'t', 'show', 'side', 'since', 'sincere', 'six', 'sixty', 'so', 'some', 'somehow', 'someone', 'something', 'sometime', 'sometimes', 'somewhere', 'still', 'such', 'system', 'take', 'ten', 'than', 'that', 'that\'s', 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'thence', 'there', 'there\'s', 'thereafter', 'thereby', 'therefore', 'therein', 'thereupon', 'these', 'they', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve', 'thickv', 'thin', 'third', 'this', 'those', 'though', 'three', 'through', 'throughout', 'thru', 'thus', 'to', 'together', 'too', 'top', 'toward', 'towards', 'twelve', 'twenty', 'two', 'un', 'under', 'until', 'up', 'upon', 'us', 'use', 'very', 'via', 'was', 'wasn\'t', 'we', 'we\'d', 'we\'ll', 'we\'re', 'we\'ve', 'well', 'were', 'weren\'t', 'what', 'what\'s', 'whatever', 'when', 'when\'s', 'whence', 'whenever', 'where', 'where\'s', 'whereafter', 'whereas', 'whereby', 'wherein', 'whereupon', 'wherever', 'whether', 'which', 'while', 'whither', 'who', 'who\'s', 'whoever', 'whole', 'whom', 'whose', 'why', 'why\'s', 'will', 'with', 'within', 'without', 'won\'t', 'would', 'wouldn\'t', 'www', 'yet', 'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves' ) );
-	// sort( $current_terms );
+
 	return $current_terms;
 }
 
+/**
+ * Get cached related posts with transient caching.
+ *
+ * Retrieves related posts from cache or generates them if cache is expired.
+ * Uses WordPress transients for performance optimization.
+ *
+ * @since 2.3
+ * @param int $post_id The post ID to find related posts for.
+ * @param int $limit Maximum number of related posts to return (default: 5).
+ * @return array Array of related post IDs, limited to specified count.
+ */
 function get_cached_related_posts( $post_id, $limit = 5 ) {
-	// Try to get cached results
+
 	$cache_key      = 'related_posts_' . $post_id;
 	$cached_results = get_transient( $cache_key );
 
 	if ( $cached_results ) {
-		// aisee_flog( __FUNCTION__ . 'cached related_ids' );
-		// aisee_flog( $cached_results );
+
 		$cached_results = array_slice( array_values( $cached_results ), 0, min( count( $cached_results ), $limit ), true );
-		// aisee_flog( __FUNCTION__ . ' returning ' );
-		// aisee_flog( $cached_results );
+
 		return $cached_results;
 	}
-	aisee_flog( __FUNCTION__ . ' no cached_results' );
 
-	// If no cache, fetch related posts
 	$related_posts = aisee_related( $post_id );
 
-	// Cache results for 15 days
 	set_transient( $cache_key, $related_posts, 15 * DAY_IN_SECONDS );
 
-	// aisee_flog( __FUNCTION__ . ' related_posts' );
-	// aisee_flog( $related_posts );
 	$related_posts = array_slice( array_values( $related_posts ), 0, min( count( $related_posts ), $limit ), true );
-	// aisee_flog( __FUNCTION__ . 'sliced related' );
-	// aisee_flog( $related_posts );
 	return $related_posts;
 }
 
 add_filter( 'the_content', 'aisee_show_related_posts', 9 );
 
+/**
+ * Add related posts section to post content.
+ *
+ * Automatically appends a "See Also" section with related posts
+ * to the content of posts (but not pages) based on AISee term similarity.
+ *
+ * @since 2.3
+ * @param string $content The original post content.
+ * @return string Modified content with related posts section appended.
+ */
 function aisee_show_related_posts( $content ) {
 	if ( is_page() ) { // for pages, don't show related posts
 		return $content;
 	}
 	global $post;
 	$related_ids = get_cached_related_posts( $post->ID );
-	aisee_flog( __FUNCTION__ . ' related_ids for ' . $post->ID );
-	aisee_flog( $related_ids );
 	if ( empty( $related_ids ) ) {
 		return $content;
 	}

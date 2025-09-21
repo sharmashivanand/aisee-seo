@@ -1,0 +1,198 @@
+// AISee SEO Admin Styles
+// Variables
+$golden-ratio: 0.618;
+$green-primary: #008000;
+$green-alpha: #00800080;
+$border-radius: 4px;
+$padding-base: #{$golden-ratio}em 1em;
+
+// Commented out postbox styles
+/*
+.postbox-container .postbox {
+    margin: 1em;
+    border: 1px solid red;
+    border-bottom: 1px solid green;
+}
+*/
+
+// AISee tag postbox
+#aisee-tag {
+    &.postbox p.submit {
+        float: none;
+    }
+}
+
+// Action buttons
+%action-button-base {
+    display: inline-block;
+    font-weight: 500;
+    color: white;
+    padding: #{$golden-ratio}em #{$golden-ratio * 0.618}em;
+    line-height: 0em;
+    cursor: pointer;
+    font-family: monospace;
+}
+
+.aisee-action-add {
+    @extend %action-button-base;
+    background-color: $green-alpha;
+
+    &:hover {
+        background-color: $green-primary;
+    }
+}
+
+.aisee-action-remove {
+    @extend %action-button-base;
+    background-color: $green-primary;
+
+    &:hover {
+        background-color: $green-alpha;
+    }
+}
+
+// Tag cloud
+#aisee-tag-cloud {
+    text-align: center;
+    text-transform: uppercase;
+}
+
+// Slider component
+.aiseeseo_slider {
+    margin: #{$golden-ratio}em 0;
+    width: 75%;
+}
+
+// Status indicators
+.aiseeseo_status {
+    padding: $padding-base;
+    border: 1px solid gray;
+    color: white;
+
+    &_success {
+        background: green;
+    }
+
+    &_error {
+        background: red;
+    }
+}
+
+// AI Tags
+.aitag {
+    text-transform: uppercase;
+    margin: 0.05em 0;
+    display: inline-flex;
+    background: hsl(0, 0%, 0%);
+    color: hsl(0, 0%, 100%);
+    padding: 10px;
+    border-radius: 1.618em;
+    line-height: 1em;
+}
+
+// Registration form
+#aisee_reg_form {
+    input {
+        display: block;
+        width: 250px;
+        padding: $padding-base;
+        margin-bottom: #{$golden-ratio}em;
+    }
+}
+
+// GSC Keywords table
+#aisee_gsc_keywords {
+    border-collapse: collapse;
+
+    th {
+        background: #eee;
+        padding: $padding-base;
+    }
+
+    tr {
+        &:hover td {
+            background: #fc0;
+        }
+
+        &:nth-child(even) {
+            _background: #f7f7f7;
+        }
+
+        &:nth-child(odd) {
+            _background: #fff;
+        }
+    }
+
+    td {
+        padding: $padding-base;
+    }
+}
+
+// Buttons
+.aisee-btn {
+    transition: all 0.2s linear !important;
+
+    &-loading {
+        background-image: url(brand-icon-anim.svg) !important;
+        background-repeat: no-repeat !important;
+        background-size: 18px !important;
+        background-position: 10px center !important;
+        padding-left: 40px !important;
+        text-shadow: 0 -1px 1px #eee, 1px 0 1px #eee, 0 1px 1px #eee, -1px 0 1px #eee !important;
+        box-shadow: 0 1px 0 #ccc !important;
+        background-color: white !important;
+        border-color: #ccc !important;
+        color: #000 !important;
+    }
+}
+
+// Commented out register styles
+/* 
+#aisee-register {
+    padding: #{$golden-ratio}em 1em;
+    margin-bottom: #{$golden-ratio}em;
+    box-sizing: content-box;
+}
+*/
+
+// Suggestions
+.aisee_suggestions {
+    box-sizing: border-box;
+
+    li {
+        padding: $padding-base;
+    }
+}
+
+// Admin Settings Page Styles
+.aisee-save-status {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: $border-radius;
+    font-weight: 500;
+
+    &.saving {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+    }
+
+    &.saved {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+
+    &.error {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+}
+
+.aisee-auto-save {
+    &.aisee-focused {
+        border-color: #5b9dd9;
+        box-shadow: 0 0 2px rgba(30, 140, 190, 0.8);
+    }
+}

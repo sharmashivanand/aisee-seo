@@ -1,9 +1,0 @@
-[submodule "modules/cmb2"]
-	path = modules/cmb2
-	url = https://github.com/CMB2/CMB2.git
-[submodule "modules/cmb2-tabs"]
-	path = modules/cmb2-tabs
-	url = https://github.com/rubengc/cmb2-tabs.git
-[submodule "modules/cmb-field-select2"]
-	path = modules/cmb-field-select2
-	url = https://github.com/mustardBees/cmb-field-select2.git
